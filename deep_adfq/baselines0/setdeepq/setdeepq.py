@@ -15,9 +15,9 @@ import baselines0.common.tf_util as U
 from baselines0 import logger
 from baselines0.common.schedules import LinearSchedule
 
-from baselines0 import madeepq
-from baselines0.madeepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
-from baselines0.madeepq.utils import BatchInput, load_state, save_state
+from baselines0 import setdeepq
+from baselines0.setdeepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from baselines0.setdeepq.utils import BatchInput, load_state, save_state
 
 class ActWrapper(object):
     def __init__(self, act, act_params):
@@ -32,7 +32,7 @@ class ActWrapper(object):
             for (k,v) in act_params_new.items():
                 act_params[k] = v
 
-        act = madeepq.build_act_greedy(reuse=None, **act_params)
+        act = setdeepq.build_act_greedy(reuse=tf.compat.v1.AUTO_REUSE, **act_params)
         sess = tf.compat.v1.Session()
         sess.__enter__()
         with tempfile.TemporaryDirectory() as td:
@@ -109,7 +109,7 @@ def learn(env,
           prioritized_replay_eps=1e-6,
           param_noise=False,
           callback=None,
-          scope="madeepq",
+          scope="setdeepq",
           double_q=False,
           epoch_steps=20000,
           eval_logger=None,
@@ -210,14 +210,16 @@ def learn(env,
 
     # capture the shape outside the closure so that the env object is not serialized
     # by cloudpickle when serializing make_obs_ph
-    observation_space_shape = env.observation_space.shape
+    # Make observation a Set with variable size [N,?,d_obs]
+    observation_space_shape = [None] + list(env.observation_space.shape)
+
     def make_obs_ph(name):
         return BatchInput(observation_space_shape, name=name)
 
     target_network_update_rate = np.minimum(target_network_update_freq, 1.0)
     target_network_update_freq = np.maximum(target_network_update_freq, 1.0)
 
-    act, act_test, q_values, train, update_target, lr_decay_op, lr_growth_op, _ = madeepq.build_train(
+    act, act_test, q_values, train, update_target, lr_decay_op, lr_growth_op, _ = setdeepq.build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
         num_actions=env.action_space.n,
@@ -310,9 +312,11 @@ def learn(env,
             # Store transition in the replay buffer.
             for agent_id, a_obs in obs.items():
                 if timelimit_env._elapsed_steps < timelimit_env._max_episode_steps:
-                    replay_buffer.add(a_obs, action_dict[agent_id], rew['__all__'], new_obs[agent_id], float(done['__all__']))
+                    replay_buffer.add(a_obs, action_dict[agent_id], rew['__all__'], 
+                                      new_obs[agent_id], float(done['__all__']), env.nb_targets)
                 else:
-                    replay_buffer.add(a_obs, action_dict[agent_id], rew['__all__'], new_obs[agent_id], float(not done))
+                    replay_buffer.add(a_obs, action_dict[agent_id], rew['__all__'], 
+                                      new_obs[agent_id], float(not done), env.nb_targets)
 
             obs = new_obs
             eval_logger.log_reward(rew['__all__'])
@@ -328,7 +332,7 @@ def learn(env,
                     experience = replay_buffer.sample(batch_size, beta=beta_schedule.value(t))
                     (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
                 else:
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
+                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
                     weights, batch_idxes = np.ones_like(rewards), None
 
                 td_errors, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights)

@@ -1,7 +1,42 @@
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+from baselines0.setdeepq.modules import *
+
+"""Default model for setdeepq"""
+class SetTransformer:
+    """ Based on tf implementation of Attention is All You Need: 
+        https://www.github.com/kyubyong/transformer and
+        PyTorch implementation of Set Transformer:
+        https://github.com/juho-lee/set_transformer
+    """
+    def __init__(self):
+        pass
+
+    def encoder(self, X, dim_out=64, reuse=False):
+        with tf.compat.v1.variable_scope('encoder', reuse=reuse):
+            #Embeddings for input into blocks (needs consistent shape)
+            X_embed = layers.fully_connected(X, num_outputs=dim_out, 
+                                                activation_fn=None, scope='embedding')
+            Z = SAB(X_embed, dim_out=dim_out)
+            Z = SAB(Z, dim_out=dim_out)
+        return Z
+
+    def decoder(self, Z, num_actions, dim_out=64, reuse=False):
+        with tf.compat.v1.variable_scope('decoder', reuse=reuse):
+            out = PMA(Z, dim_out=dim_out)
+            out = ff(out, dim_out=num_actions)
+        return out
+
+    def forward(self, X, num_actions, scope='SetTransformer', reuse=False):
+        with tf.compat.v1.variable_scope(scope, reuse=reuse):
+            Z = self.encoder(X)
+            q_out = self.decoder(Z, num_actions)
+            return q_out
 
 
+
+
+""" MLP that takes in sets, if using adjustments need to be made in build_graph"""
 def _mlp(hiddens, inpt, num_actions, scope, reuse=False, layer_norm=False):
     with tf.compat.v1.variable_scope(scope, reuse=reuse):
         out = inpt
@@ -11,7 +46,9 @@ def _mlp(hiddens, inpt, num_actions, scope, reuse=False, layer_norm=False):
                 out = layers.layer_norm(out, center=True, scale=True)
             out = tf.nn.relu(out)
         q_out = layers.fully_connected(out, num_outputs=num_actions, activation_fn=None)
-        return q_out
+        # import pdb;pdb.set_trace()
+        # q_out = tf.squeeze(q_out[:,0,:], axis=1)
+        return q_out[:,0,:]
 
 
 def mlp(hiddens=[], layer_norm=False):
@@ -30,62 +67,31 @@ def mlp(hiddens=[], layer_norm=False):
     return lambda *args, **kwargs: _mlp(hiddens, layer_norm=layer_norm, *args, **kwargs)
 
 
-def _cnn_to_mlp(convs, hiddens, dueling, inpt, num_actions, scope, reuse=False, layer_norm=False):
+"""Set Transofrmer in lambda format, if using adjustments need to be made in build_graph"""
+def _setTransformer(X, num_actions, scope, reuse=False, dim_out=64):
     with tf.compat.v1.variable_scope(scope, reuse=reuse):
-        out = inpt
-        with tf.compat.v1.variable_scope("convnet"):
-            for num_outputs, kernel_size, stride in convs:
-                out = layers.convolution2d(out,
-                                           num_outputs=num_outputs,
-                                           kernel_size=kernel_size,
-                                           stride=stride,
-                                           activation_fn=tf.nn.relu)
-        conv_out = layers.flatten(out)
-        with tf.compat.v1.variable_scope("action_value"):
-            action_out = conv_out
-            for hidden in hiddens:
-                action_out = layers.fully_connected(action_out, num_outputs=hidden, activation_fn=None)
-                if layer_norm:
-                    action_out = layers.layer_norm(action_out, center=True, scale=True)
-                action_out = tf.nn.relu(action_out)
-            action_scores = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=None)
+        with tf.compat.v1.variable_scope('encoder'):
+            #Embeddings for input into blocks (needs consistent shape)
+            X_embed = layers.fully_connected(X, num_outputs=dim_out, 
+                                                activation_fn=None, scope='embedding')
+            Z = SAB(X_embed, dim_out=dim_out)
+            Z = SAB(Z, dim_out=dim_out)
+        with tf.compat.v1.variable_scope('decoder'):
+            out = PMA(Z, dim_out=dim_out)
+            out = ff(out, dim_out=num_actions)
+    return out
 
-        if dueling:
-            with tf.compat.v1.variable_scope("state_value"):
-                state_out = conv_out
-                for hidden in hiddens:
-                    state_out = layers.fully_connected(state_out, num_outputs=hidden, activation_fn=None)
-                    if layer_norm:
-                        state_out = layers.layer_norm(state_out, center=True, scale=True)
-                    state_out = tf.nn.relu(state_out)
-                state_score = layers.fully_connected(state_out, num_outputs=1, activation_fn=None)
-            action_scores_mean = tf.reduce_mean(input_tensor=action_scores, axis=1)
-            action_scores_centered = action_scores - tf.expand_dims(action_scores_mean, 1)
-            q_out = state_score + action_scores_centered
-        else:
-            q_out = action_scores
-        return q_out
-
-
-def cnn_to_mlp(convs, hiddens, dueling=False, layer_norm=False):
+def setTransformer():
     """This model takes as input an observation and returns values of all actions.
 
     Parameters
     ----------
-    convs: [(int, int int)]
-        list of convolutional layers in form of
-        (num_outputs, kernel_size, stride)
     hiddens: [int]
         list of sizes of hidden layers
-    dueling: bool
-        if true double the output MLP to compute a baseline
-        for action scores
 
     Returns
     -------
     q_func: function
         q_function for DQN algorithm.
     """
-
-    return lambda *args, **kwargs: _cnn_to_mlp(convs, hiddens, dueling, layer_norm=layer_norm, *args, **kwargs)
-
+    return lambda *args, **kwargs: _setTransformer(*args, **kwargs)
