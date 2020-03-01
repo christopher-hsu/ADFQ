@@ -73,6 +73,7 @@ class Test:
         matplotlib.use('Agg')
         f0, ax0 = plt.subplots()
         _ = ax0.plot(graph_nlogdetcov, '.')
+        _ = ax0.set_title(args.env)
         _ = ax0.set_xlabel('episode number')
         _ = ax0.set_ylabel('mean_nlogdetcov')
         _ = ax0.grid()
