@@ -69,13 +69,15 @@ class Test:
         eval_dir = os.path.join(args.log_dir, 'eval_seed%d'%(seed))
         if not os.path.exists(eval_dir):
             os.makedirs(eval_dir)
-
+        meanofeps = np.mean(graph_nlogdetcov)
         matplotlib.use('Agg')
         f0, ax0 = plt.subplots()
         _ = ax0.plot(graph_nlogdetcov, '.')
         _ = ax0.set_title(args.env)
         _ = ax0.set_xlabel('episode number')
         _ = ax0.set_ylabel('mean_nlogdetcov')
+        _ = ax0.axhline(y=meanofeps, color='r', linestyle='-', label='mean over episodes: %.2f'%(meanofeps))
+        _ = ax0.legend()
         _ = ax0.grid()
         _ = f0.savefig(os.path.join(eval_dir, "%da%dt_%d_eval_eps.png"%
                                             (args.nb_agents, args.nb_targets, args.nb_test_steps)))
