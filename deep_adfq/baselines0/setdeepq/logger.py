@@ -37,7 +37,7 @@ class Logger():
             self.records['mean_nlogdetcov'] = []
             init_pose_list = pickle.load(open(kwargs['init_file_path'], "rb")) if eval_type == 'fixed' else []
             nb_itrs = len(init_pose_list) if eval_type == 'fixed' else 5
-            nb_itrs = 3 if eval_type == 'fixed_nb' else 5
+            # nb_itrs = 3 if eval_type == 'fixed_nb' else 5
             self.eval_f = lambda x : evaluation_maTTenv(x, env_id, eval_type=eval_type,
                             nb_itrs=nb_itrs, init_pose_list=init_pose_list, **kwargs)
         else:
