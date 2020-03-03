@@ -37,6 +37,7 @@ class Logger():
             self.records['mean_nlogdetcov'] = []
             init_pose_list = pickle.load(open(kwargs['init_file_path'], "rb")) if eval_type == 'fixed' else []
             nb_itrs = len(init_pose_list) if eval_type == 'fixed' else 5
+            nb_itrs = 3 if eval_type == 'fixed_nb' else 5
             self.eval_f = lambda x : evaluation_maTTenv(x, env_id, eval_type=eval_type,
                             nb_itrs=nb_itrs, init_pose_list=init_pose_list, **kwargs)
         else:
@@ -108,8 +109,8 @@ class Logger():
                     _ = ax0.plot(x_vals[-len(v):], m, color='b')
                     _ = ax0.fill_between(x_vals[-len(v):], list(ids75),
                                         list(ids25), facecolor='b', alpha=0.2)
-                    if k == 'mean_nlogdetcov':
-                        _ = ax0.set_ylim(-1500, 3000)
+                    # if k == 'mean_nlogdetcov':
+                        # _ = ax0.set_ylim(-1500, 3000)
                     _ = ax0.grid()
                     _ = ax0.set_ylabel(k)
                     _ = ax0.set_xlabel('Learning Steps')
@@ -130,8 +131,8 @@ class Logger():
                 else:
                     _ = ax0.plot(x_vals[-len(v):], v, color='b')
 
-                if k == 'mean_nlogdetcov':
-                    _ = ax0.set_ylim(-1500, 3000)
+                # if k == 'mean_nlogdetcov':
+                    # _ = ax0.set_ylim(-1500, 3000)
                 _ = ax0.grid()
                 _ = ax0.set_ylabel(k)
                 _ = ax0.set_xlabel('Learning Steps')
@@ -215,6 +216,8 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
         params_set = [{}]
     elif eval_type == 'random_zone':
         params_set = MATTENV_EVAL_SET
+    elif eval_type == 'fixed_nb':
+        params_set = SET_EVAL
     elif eval_type == 'fixed':
         params_set = [{'init_pose_list':kwargs['init_pose_list']}]
     else:
@@ -250,6 +253,7 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
     return np.array(total_rewards, dtype=np.float32), np.array(total_nlogdetcov, dtype=np.float32)
 
 def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target_tracking=False):
+    # Used for plotting results over different seeds
     import matplotlib
     matplotlib.use('Agg')
     from matplotlib import pyplot as plt
@@ -276,8 +280,8 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
                 _ = ax0.plot(x_vals[-v_i.shape[1]:], np.max(v_i, axis=0), color='b')
                 _ = ax0.plot(x_vals[-v_i.shape[1]:], np.min(v_i, axis=0), color='r')
                 _ = ax0.grid()
-                if k == 'mean_nlogdetcov':
-                    ax0.set_ylim(-1500, 5000)
+                # if k == 'mean_nlogdetcov':
+                    # ax0.set_ylim(-1500, 5000)
                 _ = f0.savefig(os.path.join(save_dir, "%s_eval_%d.png"%(k,i)))
                 plt.close()
         else:
@@ -291,10 +295,42 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             _ = ax0.plot(x_vals[-v.shape[1]:], np.max(v, axis=0), color='b')
             _ = ax0.plot(x_vals[-v.shape[1]:], np.min(v, axis=0), color='r')
             _ = ax0.grid()
-            if k == 'mean_nlogdetcov':
-                ax0.set_ylim(-1500, 5000)
+            # if k == 'mean_nlogdetcov':
+                # ax0.set_ylim(-1500, 5000)
             _ = f0.savefig(os.path.join(save_dir, k+".png"))
             plt.close()
+
+
+SET_EVAL = [{
+        'nb_agents': 1,
+        'nb_targets': 1
+        },
+        {
+        'nb_agents': 1,
+        'nb_targets': 2
+        },
+        {
+        'nb_agents': 1,
+        'nb_targets': 2
+        },
+        {
+        'nb_agents': 2,
+        'nb_targets': 3
+        },
+        {
+        'nb_agents': 3,
+        'nb_targets': 3,
+        },
+        {
+        'nb_agents': 3,
+        'nb_targets': 4
+        },
+        {
+        'nb_agents': 4,
+        'nb_targets': 4
+        }
+]
+
 
 MATTENV_EVAL_SET = [{
         'lin_dist_range':(5.0, 10.0),
