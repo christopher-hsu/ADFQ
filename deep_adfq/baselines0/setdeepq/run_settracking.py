@@ -48,10 +48,11 @@ parser.add_argument('--scope',type=str, default='setdeepq')
 parser.add_argument('--ros', type=int, default=0)
 parser.add_argument('--ros_log', type=int, default=0)
 parser.add_argument('--map', type=str, default="emptyMed")
-parser.add_argument('--nb_agents', type=int, default=1)
-parser.add_argument('--nb_targets', type=int, default=2)
-parser.add_argument('--eval_type', choices=['random', 'random_zone', 'fixed'], default='random')
-parser.add_argument('--init_file_path', type=str, default=".")
+parser.add_argument('--nb_agents', type=int, default=4)
+parser.add_argument('--nb_targets', type=int, default=4)
+parser.add_argument('--eval_type', choices=['random', 'random_zone', 
+                                            'fixed_nb', 'fixed'], default='fixed_nb')
+parser.add_argument('--init_file_path', type=str, default=".", help="use eval_type: fixed_pose")
 
 args = parser.parse_args()
 
@@ -164,8 +165,8 @@ if __name__ == '__main__':
             list_records.append(pickle.load(open(os.path.join(save_dir, "seed_%d"%seed, "records.pkl"), "rb")))
             seed += 1
 
-        # batch_plot(list_records, save_dir, args.nb_train_steps,
-            # args.nb_epoch_steps, is_target_tracking=True)
+        batch_plot(list_records, save_dir, args.nb_train_steps,
+            args.nb_epoch_steps, is_target_tracking=True)
 
     elif args.mode =='test':
         test(args.seed)
