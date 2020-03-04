@@ -217,7 +217,12 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
     elif eval_type == 'random_zone':
         params_set = MATTENV_EVAL_SET
     elif eval_type == 'fixed_nb':
-        params_set = SET_EVAL
+        if env_id == 'setTracking-v3':
+            params_set = SET_EVAL_v3
+        elif env_id == 'setTracking-v4':
+            params_set = SET_EVAL_v4
+        else:
+            raise ValueError("Eval set not created for this env.")
     elif eval_type == 'fixed':
         params_set = [{'init_pose_list':kwargs['init_pose_list']}]
     else:
@@ -301,7 +306,7 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             plt.close()
 
 
-SET_EVAL = [{
+SET_EVAL_v3 = [{
         'nb_agents': 1,
         'nb_targets': 1
         },
@@ -327,6 +332,24 @@ SET_EVAL = [{
         },
         {
         'nb_agents': 4,
+        'nb_targets': 4
+        }
+]
+
+SET_EVAL_v4 = [{
+        'nb_agents': 2,
+        'nb_targets': 1
+        },
+        {
+        'nb_agents': 2,
+        'nb_targets': 2
+        },
+        {
+        'nb_agents': 2,
+        'nb_targets': 3
+        },
+        {
+        'nb_agents': 2,
         'nb_targets': 4
         }
 ]
