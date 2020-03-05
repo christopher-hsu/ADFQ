@@ -19,6 +19,8 @@ class Test:
         elif args.eval_type == 'fixed_nb':
             if args.env == 'setTracking-v1':
                 params_set = [{}]
+            elif args.env == 'setTracking-v2':
+                params_set = SET_EVAL_v4
             elif args.env == 'setTracking-v3':
                 params_set = SET_EVAL_v3
             elif args.env == 'setTracking-v4':
@@ -78,6 +80,7 @@ class Test:
             total_nlogdetcov.append(meanofeps)
             # Eval plots and saves
             eval_dir = os.path.join(args.log_dir, 'eval_seed%d'%(seed))
+            model_seed = os.path.split(args.log_fname)[0]
             if not os.path.exists(eval_dir):
                 os.makedirs(eval_dir)
             matplotlib.use('Agg')
@@ -89,11 +92,11 @@ class Test:
             _ = ax0.axhline(y=meanofeps, color='r', linestyle='-', label='mean over episodes: %.2f'%(meanofeps))
             _ = ax0.legend()
             _ = ax0.grid()
-            _ = f0.savefig(os.path.join(eval_dir, "%da%dt_%d_eval_eps.png"%
-                                                (env.nb_agents, env.nb_targets, args.nb_test_steps)))
+            _ = f0.savefig(os.path.join(eval_dir, "%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps)
+                                                    +model_seed+".png"))
             plt.close()
-            pickle.dump(ep_nlogdetcov, open(os.path.join(eval_dir,'%da%dt_%d_eval_eps.pkl'%
-                                                (env.nb_agents, env.nb_targets, args.nb_test_steps)), 'wb'))
+            pickle.dump(ep_nlogdetcov, open(os.path.join(eval_dir,"%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps))
+                                                                    +model_seed+".pkl", 'wb'))
         #Plot over all example episode sets
         f1, ax1 = plt.subplots()
         _ = ax1.plot(total_nlogdetcov, '.')
@@ -101,9 +104,9 @@ class Test:
         _ = ax1.set_xlabel('example episode set number')
         _ = ax1.set_ylabel('mean nlogdetcov over episodes')
         _ = ax1.grid()
-        _ = f1.savefig(os.path.join(eval_dir, "all_%d_eval_eps.png"%(args.nb_test_steps)))
+        _ = f1.savefig(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps)+model_seed+'.png'))
         plt.close()        
-        pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval_eps.pkl'%(args.nb_test_steps)), 'wb'))
+        pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'.pkl', 'wb'))
 
 
 SET_EVAL_v3 = [{
