@@ -277,7 +277,7 @@ def learn(env,
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
-        model_file = os.path.join(td, "model")
+        model_file = os.path.join(td, "model_best")
         model_saved = False
         if tf.train.latest_checkpoint(td) is not None:
             load_state(model_file)
@@ -364,9 +364,11 @@ def learn(env,
                     sess.run(lr_growth_op)
                     print("Learning rate grown due to a decrease in loss: %.4f -> %.4f"%( np.float16(min(checkpt_loss[-3:])),mean_loss))
                 checkpt_loss.append(mean_loss)
-                # print("Saving model to model_%d.pkl"%(t+1))
-                # act.save(os.path.join(save_dir,"model_"+str(t+1)+".pkl"))
+                # Save the most current model
+                print("Saving model to model.pkl")
+                act.save(os.path.join(save_dir,"model.pkl"))
                 mean_100ep_reward = eval_logger.get_100ep_reward()
+                # Save the best model based on 100 ep reward increases
                 if saved_mean_reward is None or mean_100ep_reward > saved_mean_reward:
                     if print_freq is not None:
                         logger.log("Saving model due to mean reward increase: {} -> {}".format(
