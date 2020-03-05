@@ -217,12 +217,16 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
     elif eval_type == 'random_zone':
         params_set = MATTENV_EVAL_SET
     elif eval_type == 'fixed_nb':
-        if env_id == 'setTracking-v3':
-            params_set = SET_EVAL_v3
-        elif env_id == 'setTracking-v4':
-            params_set = SET_EVAL_v4
-        else:
-            raise ValueError("Eval set not created for this env.")
+            if args.env == 'setTracking-v1':
+                params_set = [{}]
+            elif args.env == 'setTracking-v2':
+                params_set = SET_EVAL_v4
+            elif args.env == 'setTracking-v3':
+                params_set = SET_EVAL_v3
+            elif args.env == 'setTracking-v4':
+                params_set = SET_EVAL_v4
+            else:
+                raise ValueError("Eval set not created for this env.")
     elif eval_type == 'fixed':
         params_set = [{'init_pose_list':kwargs['init_pose_list']}]
     else:
