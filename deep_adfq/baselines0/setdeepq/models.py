@@ -33,7 +33,7 @@ class SetTransformer:
         with tf.compat.v1.variable_scope(scope, reuse=reuse):
             Z = self.encoder(X)
             q_out = self.decoder(Z, num_actions)
-            return q_out
+        return q_out
 
 
 
