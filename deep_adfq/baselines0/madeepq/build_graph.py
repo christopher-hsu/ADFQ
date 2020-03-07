@@ -344,10 +344,10 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         q_tp1_best = tf.minimum(q1_tp1_selected, q2_tp1_selected)
 
         # Done mask
-        q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
+        # q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
 
         # compute RHS of bellman equation
-        q_tp1_selected_target = rew_t_ph + gamma * q_tp1_best_masked
+        q_tp1_selected_target = rew_t_ph + gamma * q_tp1_best
 
         # compute the error (potentially clipped)
         td_error1 = q1_t_selected - tf.stop_gradient(q_tp1_selected_target)
