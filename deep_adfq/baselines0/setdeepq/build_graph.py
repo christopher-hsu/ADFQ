@@ -99,6 +99,7 @@ The functions in this file can are used to create the following functions:
 
 """
 import tensorflow as tf
+import math
 import baselines0.common.tf_util as U
 
 
@@ -310,11 +311,11 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         obs_tp1_input = make_obs_ph("obs_tp1")
         done_mask_ph = tf.compat.v1.placeholder(tf.float32, [None], name="done")
         importance_weights_ph = tf.compat.v1.placeholder(tf.float32, [None], name="weight")
+        iteration = tf.compat.v1.placeholder(tf.float32, name="iteration")
 
-        # Learning rate adjustment
-        lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32)
-        lr_decay_op = lr.assign(tf.clip_by_value(lr*lr_decay_factor, 1e-5, 1e-2))
-        lr_growth_op = lr.assign(tf.clip_by_value(lr*lr_growth_factor, 1e-5, 1e-2))
+        # Cosine learning rate adjustment
+        lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32, name='lr')
+        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/500000)+0.00051, 1e-5, 1e-3)
         optimizer = optimizer_f(learning_rate = lr)
 
         # q network evaluation
@@ -343,9 +344,6 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         # Min of target q values to be used bellman equation
         q_tp1_best = tf.minimum(q1_tp1_selected, q2_tp1_selected)
 
-        # Done mask
-        # q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
-
         # compute RHS of bellman equation
         q_tp1_selected_target = rew_t_ph + gamma * q_tp1_best
 
@@ -362,23 +360,24 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         for variable in tf.trainable_variables():
             # shape is an array of tf.Dimension
             shape = variable.get_shape()
-            #print(shape)
-            #print(len(shape))
             variable_parameters = 1
             for dim in shape:
-            #    print(dim)
                 variable_parameters *= dim.value
             # print("var params", variable_parameters)
             total_parameters += variable_parameters
         print("===============================================================")
         print("Total number of trainable params:", total_parameters)
+        print("===============================================================")
 
         # Log for tensorboard
         tf.summary.scalar('q1_values', tf.math.reduce_mean(q1_t))
         tf.summary.scalar('q2_values', tf.math.reduce_mean(q2_t))
+        tf.summary.scalar('td_1', tf.math.reduce_mean(td_error1))
+        tf.summary.scalar('td_2', tf.math.reduce_mean(td_error2))
+        tf.summary.scalar('weighted_loss', weighted_error)
+        tf.summary.scalar('lr_schedule', lr)
         tf.summary.scalar('td_MSE_1', tf.math.reduce_mean(tf.math.square(td_error1)))
         tf.summary.scalar('td_MSE_2', tf.math.reduce_mean(tf.math.square(td_error2)))
-        tf.summary.scalar('weighted_loss', weighted_error)
 
         # combine variable scopes
         q_func_vars = q1_func_vars+q2_func_vars
@@ -415,13 +414,16 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
                 rew_t_ph,
                 obs_tp1_input,
                 done_mask_ph,
-                importance_weights_ph
+                importance_weights_ph,
+                iteration
             ],
             outputs=[td_error1, td_error2, tf.reduce_mean(input_tensor=errors), merged_summary],
             updates=[optimize_expr]
         )
         update_target = U.function([], [], updates=[update_target_expr1, update_target_expr2])
 
+        update_lr = U.function(inputs=[iteration], outputs=[], updates=[lr])
+
         q_values = U.function(inputs=[obs_t_input], outputs=[q1_t, q2_t])
 
-        return act_f, act_greedy, q_values, train, update_target, lr_decay_op, lr_growth_op, {'q_values': q_values}
+        return act_f, act_greedy, q_values, train, update_target, update_lr, {'q_values': q_values}
