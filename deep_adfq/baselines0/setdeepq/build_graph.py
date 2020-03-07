@@ -344,10 +344,10 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         q_tp1_best = tf.minimum(q1_tp1_selected, q2_tp1_selected)
 
         # Done mask
-        q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
+        # q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
 
         # compute RHS of bellman equation
-        q_tp1_selected_target = rew_t_ph + gamma * q_tp1_best_masked
+        q_tp1_selected_target = rew_t_ph + gamma * q_tp1_best
 
         # compute the error (potentially clipped)
         td_error1 = q1_t_selected - tf.stop_gradient(q_tp1_selected_target)
@@ -356,6 +356,22 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         errors2 = U.huber_loss(td_error2)
         errors = errors1 + errors2
         weighted_error = tf.reduce_mean(input_tensor=importance_weights_ph * errors)
+
+        #Print total number of params
+        total_parameters = 0
+        for variable in tf.trainable_variables():
+            # shape is an array of tf.Dimension
+            shape = variable.get_shape()
+            #print(shape)
+            #print(len(shape))
+            variable_parameters = 1
+            for dim in shape:
+            #    print(dim)
+                variable_parameters *= dim.value
+            # print("var params", variable_parameters)
+            total_parameters += variable_parameters
+        print("===============================================================")
+        print("Total number of trainable params:", total_parameters)
 
         # Log for tensorboard
         tf.summary.scalar('q1_values', tf.math.reduce_mean(q1_t))
