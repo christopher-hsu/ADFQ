@@ -25,6 +25,8 @@ class Test:
                 params_set = SET_EVAL_v3
             elif args.env == 'setTracking-v4':
                 params_set = SET_EVAL_v4
+            elif args.env == 'setTracking-v5':
+                params_set = SET_EVAL_v4
             else:
                 raise ValueError("Eval set not created for this env.")
         else:
