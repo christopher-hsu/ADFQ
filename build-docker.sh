@@ -2,6 +2,7 @@
 
 docker build -t tracking:latest .
 
+mkdir /home/$(whoami)/logs
 # DATE=$( date +%N )
 docker run --name tracking -it --rm \
     -p 8888:8888 -p 6006:6006 \
