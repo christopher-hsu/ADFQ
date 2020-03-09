@@ -9,5 +9,6 @@ docker run --name tracking -it --rm \
     -e DISPLAY=${DISPLAY} \
     --mount type=bind,src=/tmp/.X11-unix,dst=/tmp/.X11-unix \
     --mount type=bind,src=/home/$(whoami)/repositories,dst=/tf \
+    --mount type=bind,src=/home/$(whoami)/logs,dst=/tf \
     -w /tf \
     tracking:latest
