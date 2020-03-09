@@ -37,7 +37,7 @@ class Logger():
             self.records['mean_nlogdetcov'] = []
             init_pose_list = pickle.load(open(kwargs['init_file_path'], "rb")) if eval_type == 'fixed' else []
             nb_itrs = len(init_pose_list) if eval_type == 'fixed' else 5
-            nb_itrs = 3 if eval_type == 'fixed_nb' else 5
+            # nb_itrs = 3 if eval_type == 'fixed_nb' else 5
             self.eval_f = lambda x : evaluation_maTTenv(x, env_id, eval_type=eval_type,
                             nb_itrs=nb_itrs, init_pose_list=init_pose_list, **kwargs)
         else:
@@ -217,7 +217,18 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
     elif eval_type == 'random_zone':
         params_set = MATTENV_EVAL_SET
     elif eval_type == 'fixed_nb':
-        params_set = SET_EVAL
+            if env_id == 'setTracking-v1':
+                params_set = [{}]
+            elif env_id == 'setTracking-v2':
+                params_set = SET_EVAL_v4
+            elif env_id == 'setTracking-v3':
+                params_set = SET_EVAL_v3
+            elif env_id == 'setTracking-v4':
+                params_set = SET_EVAL_v4
+            elif env_id == 'setTracking-v5':
+                params_set = SET_EVAL_v4
+            else:
+                raise ValueError("Eval set not created for this env.")
     elif eval_type == 'fixed':
         params_set = [{'init_pose_list':kwargs['init_pose_list']}]
     else:
@@ -301,16 +312,42 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             plt.close()
 
 
-SET_EVAL = [{
+SET_EVAL_v3 = [{
         'nb_agents': 1,
         'nb_targets': 1
         },
+        # {
+        # 'nb_agents': 1,
+        # 'nb_targets': 2
+        # },
         {
-        'nb_agents': 1,
+        'nb_agents': 2,
         'nb_targets': 2
         },
+        # {
+        # 'nb_agents': 2,
+        # 'nb_targets': 3
+        # },
         {
-        'nb_agents': 1,
+        'nb_agents': 3,
+        'nb_targets': 3,
+        },
+        # {
+        # 'nb_agents': 3,
+        # 'nb_targets': 4
+        # },
+        {
+        'nb_agents': 4,
+        'nb_targets': 4
+        }
+]
+
+SET_EVAL_v4 = [{
+        'nb_agents': 2,
+        'nb_targets': 1
+        },
+        {
+        'nb_agents': 2,
         'nb_targets': 2
         },
         {
@@ -318,15 +355,7 @@ SET_EVAL = [{
         'nb_targets': 3
         },
         {
-        'nb_agents': 3,
-        'nb_targets': 3,
-        },
-        {
-        'nb_agents': 3,
-        'nb_targets': 4
-        },
-        {
-        'nb_agents': 4,
+        'nb_agents': 2,
         'nb_targets': 4
         }
 ]

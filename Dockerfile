@@ -1,23 +1,33 @@
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+# Tensorflow gpu image as parent image
+FROM tensorflow/tensorflow:1.14.0-gpu-py3-jupyter
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install sudo git wget python-dev python3-dev libopenmpi-dev python-pip python3-pip zlib1g-dev cmake python-opencv tmux libav-tools vim
+# Set the working directory to /tf
+WORKDIR /tf
 
-RUN pip3 install --upgrade pip
+# Copy the current directory contents into the container at /tf
+COPY . /tf
 
-RUN pip3 install tensorflow-gpu pyyaml scipy numpy tabulate matplotlib
-RUN pip3 install gym[atari,classic_control] tqdm joblib zmq dill progressbar2 mpi4py cloudpickle click opencv-python
+# During building, skip package interactions
+ARG DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /tmp/
+RUN apt-get update && \
+    apt-get install -y eog python3-dev python3-tk python3-yaml && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists
 
-RUN export uid=1008 gid=1008 && \
-    mkdir -p /home/developer && \
-    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
-    echo "developer:x:${uid}:" >> /etc/group && \
-    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
-    chmod 0440 /etc/sudoers.d/developer && \
-    chown ${uid}:${gid} -R /home/developer
+RUN apt-get update && \
+    apt-get install -y zlib1g-dev libjpeg-dev cmake swig python-pyglet python3-opengl \
+                libboost-all-dev libsdl2-dev libosmesa6-dev patchelf ffmpeg xvfb
 
-USER developer
+# Install latest ray and any needed packages specified in requirements.txt
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-ENV HOME /home/developer/Desktop/docker-code/
-WORKDIR /home/developer/Desktop/docker-code/
+# Add other directories to PYTHONPATH
+RUN source setup
+
+# Push GUI outisde container to local host
+ENV QT_X11_NO_MITSHM=1
+
+# RUN useradd -ms /bin/bash chrishsu
+
+# USER chrishsu

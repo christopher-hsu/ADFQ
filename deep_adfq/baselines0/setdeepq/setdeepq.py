@@ -221,13 +221,13 @@ def learn(env,
     target_network_update_rate = np.minimum(target_network_update_freq, 1.0)
     target_network_update_freq = np.maximum(target_network_update_freq, 1.0)
 
-    act, act_test, q_values, train, update_target, lr_decay_op, lr_growth_op, _ = setdeepq.build_train(
+    act, act_test, q_values, train, update_target, lr_decay_op, _ = setdeepq.build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
         num_actions=env.action_space.n,
         optimizer_f=tf.compat.v1.train.AdamOptimizer,
         gamma=gamma,
-        grad_norm_clipping=10,
+        grad_norm_clipping=5, #10,
         param_noise=param_noise,
         double_q=bool(double_q),
         scope=scope,
@@ -337,7 +337,7 @@ def learn(env,
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
                     weights, batch_idxes = np.ones_like(rewards), None
 
-                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights, t)
 
                 file_writer.add_summary(summary, t)
                 eval_logger.log_step(loss=loss)
@@ -348,25 +348,25 @@ def learn(env,
                 if render:
                     env.render()
 
+            #Update target network
             if t > learning_starts and (t+1) % target_network_update_freq == 0:
                 update_target()
 
             if (t+1) % epoch_steps == 0:
                 eval_logger.log_epoch(act_test)
 
+            #Update with cosine learning rate 
+            if max_timesteps/5 < t < max_timesteps*7/10:
+                lr_decay_op(t)
+
             if (checkpoint_freq is not None and t > learning_starts and
                     (t+1) % checkpoint_freq == 0 and eval_logger.get_num_episode() > 10):
                 mean_loss = np.float16(np.mean(eval_logger.ep_history['loss']))
-                if len(checkpt_loss) > 2 and mean_loss > np.float16(max(checkpt_loss[-3:])) and lr_decay_factor < 1.0:
-                    sess.run(lr_decay_op)
-                    print("Learning rate decayed due to an increase in loss: %.4f -> %.4f"%(np.float16(max(checkpt_loss[-3:])),mean_loss))
-                elif len(checkpt_loss) > 2 and mean_loss < np.float16(min(checkpt_loss[-3:])) and lr_growth_factor > 1.0:
-                    sess.run(lr_growth_op)
-                    print("Learning rate grown due to a decrease in loss: %.4f -> %.4f"%( np.float16(min(checkpt_loss[-3:])),mean_loss))
                 checkpt_loss.append(mean_loss)
-                # print("Saving model to model_%d.pkl"%(t+1))
-                # act.save(os.path.join(save_dir,"model_"+str(t+1)+".pkl"))
+                # print("Saving current model to modellast.pkl")
+                act.save(os.path.join(save_dir,"modellast.pkl"))
                 mean_100ep_reward = eval_logger.get_100ep_reward()
+                # Save the best model based on 100 ep reward increases
                 if saved_mean_reward is None or mean_100ep_reward > saved_mean_reward:
                     if print_freq is not None:
                         logger.log("Saving model due to mean reward increase: {} -> {}".format(

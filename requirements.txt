@@ -1,0 +1,20 @@
+gym[atari]
+cython==0.29.0
+psutil          #==5.6.3
+opencv-python   #==4.1.0.25
+tabulate        #==0.8.3
+numba           #==0.44.1
+cloudpickle     #==1.2.1
+tqdm            #==4.32.2
+joblib          #==0.13.2
+dill            #==0.3.0
+progressbar2    #==3.42.0
+scipy           #==1.3.0
+pandas		#==0.24.2
+requests
+lz4
+filterpy
+torch
+torchvision
+
+# mpi4py

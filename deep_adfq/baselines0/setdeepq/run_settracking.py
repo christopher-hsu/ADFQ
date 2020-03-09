@@ -22,13 +22,14 @@ parser.add_argument('--prioritized-replay-alpha', type=float, default=0.6)
 parser.add_argument('--double_q', type=int, default=1)  #not used: always clipped double q
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
 parser.add_argument('--dueling', type=int, default=0)
-parser.add_argument('--nb_train_steps', type=int, default=100000)
-parser.add_argument('--buffer_size', type=int, default=100000)
+parser.add_argument('--nb_train_steps', type=int, default=120000)
+parser.add_argument('--buffer_size', type=int, default=1e6)
 parser.add_argument('--batch_size', type=int, default=64)
-parser.add_argument('--nb_warmup_steps', type=int, default = 10000)
-parser.add_argument('--nb_epoch_steps', type=int, default = 1000)
+parser.add_argument('--nb_warmup_steps', type=int, default=10000)
+parser.add_argument('--nb_epoch_steps', type=int, default=5000)
+parser.add_argument('--checkpoint_freq', type=int, default=2000)
 parser.add_argument('--target_update_freq', type=float, default=0.005) #tau in polyak averaging
-parser.add_argument('--nb_test_steps',type=int, default = None)
+parser.add_argument('--nb_test_steps',type=int, default=None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_decay_factor', type=float, default=1.0)
 parser.add_argument('--learning_rate_growth_factor', type=float, default=1.0)
@@ -91,7 +92,7 @@ def train(seed, save_dir):
                 exploration_final_eps=args.eps_min,
                 target_network_update_freq=args.target_update_freq,
                 print_freq=10,
-                checkpoint_freq=int(args.nb_train_steps/10),
+                checkpoint_freq=args.checkpoint_freq,
                 learning_starts=args.nb_warmup_steps,
                 gamma = args.gamma,
                 prioritized_replay=bool(args.prioritized),
