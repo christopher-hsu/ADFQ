@@ -23,11 +23,11 @@ RUN apt-get update && \
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Add other directories to PYTHONPATH
-RUN source setup
+#RUN source setup
 
 # Push GUI outisde container to local host
 ENV QT_X11_NO_MITSHM=1
 
-RUN useradd -ms /bin/bash chrishsu
+#RUN useradd -ms /bin/bash chrishsu
 
-USER chrishsu
+#USER chrishsu
