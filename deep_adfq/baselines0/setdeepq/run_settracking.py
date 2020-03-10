@@ -148,7 +148,7 @@ if __name__ == '__main__':
     if args.mode == 'train':
         save_dir = os.path.join(args.log_dir, '_'.join([args.env, datetime.datetime.now().strftime("%m%d%H%M")]))
         if not os.path.exists(save_dir):
-            os.makedirs(save_dir, mode=0777)
+            os.makedirs(save_dir)
         else:
             ValueError("The directory already exists...", save_dir)
         json.dump(vars(args), open(os.path.join(save_dir, 'learning_prop.json'), 'w'))
