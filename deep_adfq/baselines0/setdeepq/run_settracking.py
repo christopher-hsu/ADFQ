@@ -15,7 +15,7 @@ import envs
 from baselines0.setdeepq.logger import Logger, batch_plot
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--env', help='environment ID', default='setTracking-v1')
+parser.add_argument('--env', help='environment ID', default='setTracking-v3')
 parser.add_argument('--seed', help='RNG seed', type=int, default=0)
 parser.add_argument('--prioritized', type=int, default=0)
 parser.add_argument('--prioritized-replay-alpha', type=float, default=0.6)
