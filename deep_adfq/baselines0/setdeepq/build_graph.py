@@ -357,7 +357,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
 
         #Print total number of params
         total_parameters = 0
-        for variable in tf.trainable_variables():
+        for variable in tf.compat.v1.trainable_variables():
             # shape is an array of tf.Dimension
             shape = variable.get_shape()
             variable_parameters = 1
