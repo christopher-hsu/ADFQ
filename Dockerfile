@@ -28,6 +28,6 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 # Push GUI outisde container to local host
 ENV QT_X11_NO_MITSHM=1
 
-#RUN useradd -ms /bin/bash chrishsu
+RUN useradd -ms /bin/bash chrishsu
 
-#USER chrishsu
+USER chrishsu
