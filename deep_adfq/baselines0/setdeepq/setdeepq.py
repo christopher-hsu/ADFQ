@@ -357,7 +357,7 @@ def learn(env,
 
             #Update with cosine learning rate 
             if max_timesteps/5 < t < max_timesteps*7/10:
-                lr_decay_op(t)
+                lr_decay_op(t-max_timesteps/5)
 
             if (checkpoint_freq is not None and t > learning_starts and
                     (t+1) % checkpoint_freq == 0 and eval_logger.get_num_episode() > 10):
