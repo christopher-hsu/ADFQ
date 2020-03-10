@@ -16,5 +16,6 @@ lz4
 filterpy
 torch
 torchvision
+pyyaml
 
 # mpi4py
