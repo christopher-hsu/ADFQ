@@ -4,4 +4,6 @@ dependencies:
 - pip
 - conda>=4.7
 - pip:
+    - tensorflow==1.14
+    - tensorflow-gpu==1.14
     - -r ./requirements.txt
