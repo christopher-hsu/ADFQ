@@ -6,7 +6,7 @@ def SAB(X, dim_out, scope='SAB'):
     # Set Attention Block
     with tf.compat.v1.variable_scope(scope):
         out = MAB(X, X, dim_out)
-        out = ff(out)
+        out = ff(out, dim_out)
     return out
 
 def PMA(X, dim_out, num_seeds=1, scope='PMA'):
@@ -16,8 +16,7 @@ def PMA(X, dim_out, num_seeds=1, scope='PMA'):
                             initializer=tf.contrib.layers.xavier_initializer())
         S_ = tf.tile(S, [tf.shape(X)[0],1,1])
         out = MAB(S_, X, dim_out)
-        # Rm dim=1 [N,1,d_obs] to out = [N,d_obs]
-        out = tf.squeeze(out, axis=1)
+        out = ff(out, dim_out)
     return out
 
 def MAB(Q, K, dim_out, num_heads=4, scope='MAB'):
@@ -62,7 +61,7 @@ def scaled_dot_product_attention(Q, K, V, scope='Attention'):
 
     return out
 
-def ff(inputs, dim_out=64, scope='feed_forward'):
+def ff(inputs, dim_out, scope='feed_forward'):
     #position-wise feed forward net. See 3.3
     with tf.compat.v1.variable_scope(scope):
         #Layers
