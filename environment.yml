@@ -1,0 +1,7 @@
+name: tracking
+dependencies:
+- python>=3.6,<3.8
+- pip
+- conda>=4.7
+- pip:
+    - -r ./requirements.txt
