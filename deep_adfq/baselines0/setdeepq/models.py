@@ -9,8 +9,9 @@ class SetTransformer:
         PyTorch implementation of Set Transformer:
         https://github.com/juho-lee/set_transformer
     """
-    def __init__(self):
-        pass
+    def __init__(self, hiddens):
+        self.enc_dim = hiddens[0]
+        self.dec_dim = hiddens[1]
 
     def encoder(self, X, dim_out=100, reuse=False):
         with tf.compat.v1.variable_scope('encoder', reuse=reuse):
@@ -33,8 +34,8 @@ class SetTransformer:
 
     def forward(self, X, num_actions, scope='SetTransformer', reuse=False):
         with tf.compat.v1.variable_scope(scope, reuse=reuse):
-            Z = self.encoder(X)
-            q_out = self.decoder(Z, num_actions)
+            Z = self.encoder(X, dim_out=self.enc_dim)
+            q_out = self.decoder(Z, num_actions, dim_out=self.dec_dim)
         return q_out
 
 

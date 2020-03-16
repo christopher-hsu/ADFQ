@@ -233,9 +233,8 @@ def build_act_greedy(make_obs_ph, q_func, num_actions, scope="setdeepq", reuse=T
 
 
 def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
-    grad_norm_clipping=None, gamma=1.0, double_q=False, scope="setdeepq",
-    reuse=None, param_noise=False, param_noise_filter_func=None, test_eps=0.05,
-    lr_init = 0.001, lr_period=250000, tau=0.05):
+    grad_norm_clipping=None, gamma=1.0, scope="setdeepq", reuse=None,
+    test_eps=0.05, lr_init = 0.001, lr_period=250000, tau=0.05):
     """Creates the train function:
 
     Parameters
@@ -262,24 +261,14 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         clip gradient norms to this value. If None no clipping is performed.
     gamma: float
         discount rate.
-    double_q: bool
-        if true will use Double Q Learning (https://arxiv.org/abs/1509.06461).
-        In general it is a good idea to keep it enabled.
     scope: str or VariableScope
         optional scope for variable_scope.
     reuse: bool or None
         whether or not the variables should be reused. To be able to reuse the scope must be given.
-    param_noise: bool
-        whether or not to use parameter space noise (https://arxiv.org/abs/1706.01905)
-    param_noise_filter_func: tf.Variable -> bool
-        function that decides whether or not a variable should be perturbed. Only applicable
-        if param_noise is True. If set to None, default_param_noise_filter is used by default.
     lr_init : float
         initial learning rate
-    lr_decay_factor : float
-        learning rate decay factor. It should be equal to or smaller than 1.0.
-    lr_growth_factor : float
-        learning rate growth factor. It should be equal to or larger than 1.0.
+    lr_period : int
+        learning rate schedule following a cosine with this period
     tau : float
         parameter for the soft target network update. tau <= 1.0 and 1.0 for
         the hard update.

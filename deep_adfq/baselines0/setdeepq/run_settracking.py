@@ -18,11 +18,7 @@ from baselines0.setdeepq.logger import Logger, batch_plot
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--env', help='environment ID', default='setTracking-v3')
 parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-parser.add_argument('--prioritized', type=int, default=0)
-parser.add_argument('--prioritized-replay-alpha', type=float, default=0.6)
-parser.add_argument('--double_q', type=int, default=1)  #not used: always clipped double q
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
-parser.add_argument('--dueling', type=int, default=0)
 parser.add_argument('--nb_train_steps', type=int, default=1000000)
 parser.add_argument('--buffer_size', type=int, default=1e6)
 parser.add_argument('--batch_size', type=int, default=256)
@@ -34,7 +30,7 @@ parser.add_argument('--nb_test_steps',type=int, default=None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_period', type=float, default=250000)
 parser.add_argument('--gamma', type=float, default=.99)
-parser.add_argument('--hiddens', type=str, default='64:128:64')
+parser.add_argument('--hiddens', type=str, default='100:100') #encoder and decoder dim, respectively
 parser.add_argument('--log_dir', type=str, default='.')
 parser.add_argument('--log_fname', type=str, default='model.pkl')
 parser.add_argument('--eps_fraction', type=float, default=0.1)
@@ -78,7 +74,7 @@ def train(seed, save_dir):
         with tf.compat.v1.variable_scope('seed_%d'%seed):
             hiddens = args.hiddens.split(':')
             hiddens = [int(h) for h in hiddens]
-            model = setdeepq.models.SetTransformer()
+            model = setdeepq.models.SetTransformer(hiddens)
             act = setdeepq.learn(
                 env,
                 q_func=model,
@@ -94,10 +90,7 @@ def train(seed, save_dir):
                 checkpoint_freq=args.checkpoint_freq,
                 learning_starts=args.nb_warmup_steps,
                 gamma = args.gamma,
-                prioritized_replay=bool(args.prioritized),
-                prioritized_replay_alpha=args.prioritized_replay_alpha,
                 callback=None,#callback,
-                double_q = args.double_q,
                 scope=args.scope,
                 epoch_steps = args.nb_epoch_steps,
                 eval_logger=Logger(args.env,

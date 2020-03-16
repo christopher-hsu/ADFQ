@@ -101,15 +101,9 @@ def learn(env,
           learning_starts=1000,
           gamma=1.0,
           target_network_update_freq=0.05,
-          prioritized_replay=False,
-          prioritized_replay_alpha=0.6,
-          prioritized_replay_beta0=0.4,
-          prioritized_replay_beta_iters=None,
-          prioritized_replay_eps=1e-6,
           param_noise=False,
           callback=None,
           scope="setdeepq",
-          double_q=False,
           epoch_steps=20000,
           eval_logger=None,
           save_dir='.',
@@ -227,8 +221,6 @@ def learn(env,
         optimizer_f=tf.compat.v1.train.AdamOptimizer,
         gamma=gamma,
         grad_norm_clipping=5, #10,
-        param_noise=param_noise,
-        double_q=bool(double_q),
         scope=scope,
         test_eps=test_eps,
         lr_init=lr,
@@ -246,16 +238,8 @@ def learn(env,
     act = ActWrapper(act, act_params)
 
     # Create the replay buffer
-    if prioritized_replay:
-        replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
-        if prioritized_replay_beta_iters is None:
-            prioritized_replay_beta_iters = max_timesteps
-        beta_schedule = LinearSchedule(prioritized_replay_beta_iters,
-                                       initial_p=prioritized_replay_beta0,
-                                       final_p=1.0)
-    else:
-        replay_buffer = ReplayBuffer(buffer_size)
-        beta_schedule = None
+    replay_buffer = ReplayBuffer(buffer_size)
+    beta_schedule = None
     # Create the schedule for exploration starting from 1.
     exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * max_timesteps),
                                  initial_p=1.0,
@@ -328,12 +312,8 @@ def learn(env,
 
             if t > learning_starts and (t+1) % train_freq == 0:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
-                if prioritized_replay:
-                    experience = replay_buffer.sample(batch_size, beta=beta_schedule.value(t))
-                    (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
-                else:
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
-                    weights, batch_idxes = np.ones_like(rewards), None
+                obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
+                weights, batch_idxes = np.ones_like(rewards), None
                 
                 #Update with cosine learning rate 
                 if t < max_timesteps/5:
@@ -348,9 +328,6 @@ def learn(env,
                 file_writer.add_summary(summary, t)
                 eval_logger.log_step(loss=loss)
 
-                if prioritized_replay:
-                    new_priorities = np.abs(td_errors) + prioritized_replay_eps
-                    replay_buffer.update_priorities(batch_idxes, new_priorities)
                 if render:
                     env.render()
 
