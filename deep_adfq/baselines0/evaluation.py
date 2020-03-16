@@ -120,7 +120,7 @@ SET_EVAL_v3 = [{
         'nb_targets': 2
         },
         {
-        'nb_agents': 1,
+        'nb_agents': 2,
         'nb_targets': 2
         },
         {

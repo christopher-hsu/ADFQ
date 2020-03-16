@@ -12,7 +12,7 @@ class SetTransformer:
     def __init__(self):
         pass
 
-    def encoder(self, X, dim_out=128, reuse=False):
+    def encoder(self, X, dim_out=100, reuse=False):
         with tf.compat.v1.variable_scope('encoder', reuse=reuse):
             #Embeddings for input into blocks (needs consistent shape)
             X_embed = layers.fully_connected(X, num_outputs=dim_out, 
@@ -21,7 +21,7 @@ class SetTransformer:
             Z = SAB(Z, dim_out=dim_out)
         return Z
 
-    def decoder(self, Z, num_actions, dim_out=128, reuse=False):
+    def decoder(self, Z, num_actions, dim_out=100, reuse=False):
         with tf.compat.v1.variable_scope('decoder', reuse=reuse):
             out = PMA(Z, dim_out=dim_out)
             out = SAB(out, dim_out=dim_out)
