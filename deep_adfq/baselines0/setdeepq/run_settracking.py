@@ -32,8 +32,7 @@ parser.add_argument('--checkpoint_freq', type=int, default=5000)
 parser.add_argument('--target_update_freq', type=float, default=0.005) #tau in polyak averaging
 parser.add_argument('--nb_test_steps',type=int, default=None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
-parser.add_argument('--learning_rate_decay_factor', type=float, default=1.0)
-parser.add_argument('--learning_rate_growth_factor', type=float, default=1.0)
+parser.add_argument('--learning_rate_period', type=float, default=250000)
 parser.add_argument('--gamma', type=float, default=.99)
 parser.add_argument('--hiddens', type=str, default='64:128:64')
 parser.add_argument('--log_dir', type=str, default='.')
@@ -84,8 +83,7 @@ def train(seed, save_dir):
                 env,
                 q_func=model,
                 lr=args.learning_rate,
-                lr_decay_factor=args.learning_rate_decay_factor,
-                lr_growth_factor=args.learning_rate_growth_factor,
+                lr_period=args.learning_rate_period,
                 max_timesteps=args.nb_train_steps,
                 buffer_size=args.buffer_size,
                 batch_size=args.batch_size,

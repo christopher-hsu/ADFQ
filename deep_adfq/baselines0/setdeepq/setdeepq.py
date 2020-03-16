@@ -88,8 +88,7 @@ def load(path, act_params=None):
 def learn(env,
           q_func,
           lr=5e-4,
-          lr_decay_factor = 0.99,
-          lr_growth_factor = 1.01,
+          lr_period=250000,
           max_timesteps=100000,
           buffer_size=50000,
           exploration_fraction=0.1,
@@ -220,8 +219,6 @@ def learn(env,
     # if target_network_update is > 1, update periodically
     target_network_update_rate = np.minimum(target_network_update_freq, 1.0)
     target_network_update_freq = np.maximum(target_network_update_freq, 1.0)
-    # Cosine lr schedule period
-    lr_period = 250000
 
     act, act_test, q_values, train, update_target, _ = setdeepq.build_train(
         make_obs_ph=make_obs_ph,
