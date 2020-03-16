@@ -235,7 +235,7 @@ def build_act_greedy(make_obs_ph, q_func, num_actions, scope="setdeepq", reuse=T
 def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
     grad_norm_clipping=None, gamma=1.0, double_q=False, scope="setdeepq",
     reuse=None, param_noise=False, param_noise_filter_func=None, test_eps=0.05,
-    lr_init = 0.001, lr_decay_factor=0.99, lr_growth_factor=1.001, tau=0.05):
+    lr_init = 0.001, lr_period=250000, tau=0.05):
     """Creates the train function:
 
     Parameters
@@ -315,7 +315,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
 
         # Cosine learning rate adjustment
         lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32, name='lr')
-        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/250000)+0.000501, 1e-6, 1e-3)
+        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period)+0.000501, 1e-6, 1e-3)
         optimizer = optimizer_f(learning_rate = lr)
 
         # q network evaluation
@@ -418,12 +418,10 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
                 iteration
             ],
             outputs=[td_error1, td_error2, tf.reduce_mean(input_tensor=errors), merged_summary],
-            updates=[optimize_expr]
+            updates=[optimize_expr, lr]
         )
         update_target = U.function([], [], updates=[update_target_expr1, update_target_expr2])
 
-        update_lr = U.function(inputs=[iteration], outputs=[], updates=[lr])
-
         q_values = U.function(inputs=[obs_t_input], outputs=[q1_t, q2_t])
 
-        return act_f, act_greedy, q_values, train, update_target, update_lr, {'q_values': q_values}
+        return act_f, act_greedy, q_values, train, update_target, {'q_values': q_values}

@@ -220,8 +220,10 @@ def learn(env,
     # if target_network_update is > 1, update periodically
     target_network_update_rate = np.minimum(target_network_update_freq, 1.0)
     target_network_update_freq = np.maximum(target_network_update_freq, 1.0)
+    # Cosine lr schedule period
+    lr_period = 250000
 
-    act, act_test, q_values, train, update_target, lr_decay_op, _ = setdeepq.build_train(
+    act, act_test, q_values, train, update_target, _ = setdeepq.build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
         num_actions=env.action_space.n,
@@ -233,8 +235,7 @@ def learn(env,
         scope=scope,
         test_eps=test_eps,
         lr_init=lr,
-        lr_decay_factor=lr_decay_factor,
-        lr_growth_factor=lr_growth_factor,
+        lr_period=lr_period,
         reuse=tf.compat.v1.AUTO_REUSE,
         tau=target_network_update_rate,
     )
@@ -336,8 +337,16 @@ def learn(env,
                 else:
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
                     weights, batch_idxes = np.ones_like(rewards), None
+                
+                #Update with cosine learning rate 
+                if t < max_timesteps/5:
+                    lr_iter = 0
+                elif t < max_timesteps*7/10:
+                    lr_iter = t-max_timesteps/5
+                else: 
+                    lr_iter = lr_period
 
-                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights, t)
+                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights, lr_iter)
 
                 file_writer.add_summary(summary, t)
                 eval_logger.log_step(loss=loss)
@@ -354,10 +363,6 @@ def learn(env,
 
             if (t+1) % epoch_steps == 0:
                 eval_logger.log_epoch(act_test)
-
-            #Update with cosine learning rate 
-            if max_timesteps/5 < t < max_timesteps*7/10:
-                lr_decay_op(t-max_timesteps/5)
 
             if (checkpoint_freq is not None and t > learning_starts and
                     (t+1) % checkpoint_freq == 0 and eval_logger.get_num_episode() > 10):
