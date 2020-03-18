@@ -81,7 +81,7 @@ class Test:
             meanofeps = np.mean(ep_nlogdetcov)
             total_nlogdetcov.append(meanofeps)
             # Eval plots and saves
-            eval_dir = os.path.join(args.log_dir, 'eval_seed%d'%(seed))
+            eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
             model_seed = os.path.split(args.log_fname)[0]
             if not os.path.exists(eval_dir):
                 os.makedirs(eval_dir)

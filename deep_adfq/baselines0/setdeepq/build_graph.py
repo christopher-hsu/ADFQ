@@ -304,7 +304,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
 
         # Cosine learning rate adjustment
         lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32, name='lr')
-        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period)+0.000501, 1e-6, 1e-3)
+        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period)+0.00055, 1e-5, 1e-3)
         optimizer = optimizer_f(learning_rate = lr)
 
         # q network evaluation
