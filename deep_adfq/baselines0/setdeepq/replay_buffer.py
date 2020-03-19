@@ -31,7 +31,7 @@ class ReplayBuffer(object):
         else:
             self._storage[self._next_idx] = data
             self._nb_targ_idxs[self._next_idx] = nb_targets
-        self._next_idx = (self._next_idx + 1) % self._maxsize
+        self._next_idx = int((self._next_idx + 1) % self._maxsize)
 
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
