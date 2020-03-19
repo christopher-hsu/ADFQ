@@ -156,24 +156,11 @@ def learn(env,
         update the target network every `target_network_update_freq` steps.
         If it is less than 1, it performs the soft target network update with
         the given rate.
-    prioritized_replay: True
-        if True prioritized replay buffer will be used.
-    prioritized_replay_alpha: float
-        alpha parameter for prioritized replay buffer
-    prioritized_replay_beta0: float
-        initial value of beta for prioritized replay buffer
-    prioritized_replay_beta_iters: int
-        number of iterations over which beta will be annealed from initial value
-        to 1.0. If set to None equals to max_timesteps.
-    prioritized_replay_eps: float
-        epsilon to add to the TD errors when updating priorities.
     callback: (locals, globals) -> None
         function called at every steps with state of the algorithm.
         If callback returns true training stops.
     scope : str
         scope of the network.
-    double_q : bool
-        True if you run Double DQN.
     epoch_step : int
         the number of steps per epoch.
     eval_logger : Logger()
