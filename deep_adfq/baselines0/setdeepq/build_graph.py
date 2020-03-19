@@ -234,7 +234,7 @@ def build_act_greedy(make_obs_ph, q_func, num_actions, scope="setdeepq", reuse=T
 
 def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
     grad_norm_clipping=None, gamma=1.0, scope="setdeepq", reuse=None,
-    test_eps=0.05, lr_init = 0.001, lr_period=250000, tau=0.05):
+    test_eps=0.05, lr_init = 0.001, lr_period_steps=250000, tau=0.05):
     """Creates the train function:
 
     Parameters
@@ -304,7 +304,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
 
         # Cosine learning rate adjustment
         lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32, name='lr')
-        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period)+0.000505, 1e-6, 1e-3)
+        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period_steps)+0.000501, 1e-6, 1e-3)
         optimizer = optimizer_f(learning_rate = lr)
 
         # q network evaluation

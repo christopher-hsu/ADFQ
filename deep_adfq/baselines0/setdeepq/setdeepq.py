@@ -88,7 +88,7 @@ def load(path, act_params=None):
 def learn(env,
           q_func,
           lr=5e-4,
-          lr_period=250000,
+          lr_period=0.6,
           max_timesteps=100000,
           buffer_size=50000,
           exploration_fraction=0.1,
@@ -210,7 +210,7 @@ def learn(env,
         scope=scope,
         test_eps=test_eps,
         lr_init=lr,
-        lr_period=lr_period,
+        lr_period_steps=lr_period*max_timesteps,
         reuse=tf.compat.v1.AUTO_REUSE,
         tau=target_network_update_rate,
     )
@@ -289,13 +289,11 @@ def learn(env,
                 obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size, env.num_targets)
                 weights, batch_idxes = np.ones_like(rewards), None
                 
-                #Update with cosine learning rate 
-                if t < max_timesteps/5:
+                #Update with cosine learning rate   
+                if t < max_timesteps*(1-lr_period):
                     lr_iter = 0
-                elif t < max_timesteps*7/10:
-                    lr_iter = t-max_timesteps/5
                 else: 
-                    lr_iter = lr_period
+                    lr_iter = t-max_timesteps*(1-lr_period)
 
                 td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights, lr_iter)
 
