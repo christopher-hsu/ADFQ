@@ -17,21 +17,16 @@ from baselines0.madeepq.logger import Logger, batch_plot
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--env', help='environment ID', default='maTracking-v2')
 parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-parser.add_argument('--prioritized', type=int, default=0)
-parser.add_argument('--prioritized-replay-alpha', type=float, default=0.6)
-parser.add_argument('--double_q', type=int, default=0)
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
-parser.add_argument('--dueling', type=int, default=0)
 parser.add_argument('--nb_train_steps', type=int, default=100000)
-parser.add_argument('--buffer_size', type=int, default=50000)
+parser.add_argument('--buffer_size', type=int, default=1e5)
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--nb_warmup_steps', type=int, default = 10000)
 parser.add_argument('--nb_epoch_steps', type=int, default = 1000)
 parser.add_argument('--target_update_freq', type=float, default=0.005) # This should be smaller than epoch_steps
 parser.add_argument('--nb_test_steps',type=int, default = None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
-parser.add_argument('--learning_rate_decay_factor', type=float, default=1.0)
-parser.add_argument('--learning_rate_growth_factor', type=float, default=1.0)
+parser.add_argument('--learning_rate_period', type=float, default=50000)
 parser.add_argument('--gamma', type=float, default=.99)
 parser.add_argument('--hiddens', type=str, default='64:128:64')
 parser.add_argument('--log_dir', type=str, default='.')
@@ -82,8 +77,7 @@ def train(seed, save_dir):
                 env,
                 q_func=model,
                 lr=args.learning_rate,
-                lr_decay_factor=args.learning_rate_decay_factor,
-                lr_growth_factor=args.learning_rate_growth_factor,
+                lr_period=args.learning_rate_period,
                 max_timesteps=args.nb_train_steps,
                 buffer_size=args.buffer_size,
                 batch_size=args.batch_size,
@@ -94,10 +88,7 @@ def train(seed, save_dir):
                 checkpoint_freq=int(args.nb_train_steps/10),
                 learning_starts=args.nb_warmup_steps,
                 gamma = args.gamma,
-                prioritized_replay=bool(args.prioritized),
-                prioritized_replay_alpha=args.prioritized_replay_alpha,
                 callback=None,#callback,
-                double_q = args.double_q,
                 scope=args.scope,
                 epoch_steps = args.nb_epoch_steps,
                 eval_logger=Logger(args.env,
@@ -165,8 +156,8 @@ if __name__ == '__main__':
             list_records.append(pickle.load(open(os.path.join(save_dir, "seed_%d"%seed, "records.pkl"), "rb")))
             seed += 1
 
-        # batch_plot(list_records, save_dir, args.nb_train_steps,
-            # args.nb_epoch_steps, is_target_tracking=True)
+        batch_plot(list_records, save_dir, args.nb_train_steps,
+            args.nb_epoch_steps, is_target_tracking=True)
 
     elif args.mode =='test':
         test(args.seed)

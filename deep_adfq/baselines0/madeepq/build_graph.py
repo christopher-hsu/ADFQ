@@ -99,6 +99,7 @@ The functions in this file can are used to create the following functions:
 
 """
 import tensorflow as tf
+import math
 import baselines0.common.tf_util as U
 
 
@@ -232,9 +233,8 @@ def build_act_greedy(make_obs_ph, q_func, num_actions, scope="setdeepq", reuse=T
 
 
 def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
-    grad_norm_clipping=None, gamma=1.0, double_q=False, scope="setdeepq",
-    reuse=None, param_noise=False, param_noise_filter_func=None, test_eps=0.05,
-    lr_init = 0.001, lr_decay_factor=0.99, lr_growth_factor=1.001, tau=0.05):
+    grad_norm_clipping=None, gamma=1.0, scope="setdeepq", reuse=None, 
+    test_eps=0.05, lr_init = 0.001, lr_period=50000, tau=0.05):
     """Creates the train function:
 
     Parameters
@@ -310,11 +310,11 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         obs_tp1_input = make_obs_ph("obs_tp1")
         done_mask_ph = tf.compat.v1.placeholder(tf.float32, [None], name="done")
         importance_weights_ph = tf.compat.v1.placeholder(tf.float32, [None], name="weight")
+        iteration = tf.compat.v1.placeholder(tf.float32, name="iteration")
 
-        # Learning rate adjustment
-        lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32)
-        lr_decay_op = lr.assign(tf.clip_by_value(lr*lr_decay_factor, 1e-5, 1e-2))
-        lr_growth_op = lr.assign(tf.clip_by_value(lr*lr_growth_factor, 1e-5, 1e-2))
+        # Cosine learning rate adjustment
+        lr = tf.Variable(float(lr_init), trainable=False, dtype = tf.float32, name='lr')
+        lr = tf.clip_by_value(0.0005*tf.math.cos(math.pi*iteration/lr_period)+0.00055, 1e-5, 1e-3)
         optimizer = optimizer_f(learning_rate = lr)
 
         # q network evaluation
@@ -399,13 +399,14 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
                 rew_t_ph,
                 obs_tp1_input,
                 done_mask_ph,
-                importance_weights_ph
+                importance_weights_ph,
+                iteration
             ],
             outputs=[td_error1, td_error2, tf.reduce_mean(input_tensor=errors), merged_summary],
-            updates=[optimize_expr]
+            updates=[optimize_expr, lr]
         )
         update_target = U.function([], [], updates=[update_target_expr1, update_target_expr2])
 
         q_values = U.function(inputs=[obs_t_input], outputs=[q1_t, q2_t])
 
-        return act_f, act_greedy, q_values, train, update_target, lr_decay_op, lr_growth_op, {'q_values': q_values}
+        return act_f, act_greedy, q_values, train, update_target, {'q_values': q_values}

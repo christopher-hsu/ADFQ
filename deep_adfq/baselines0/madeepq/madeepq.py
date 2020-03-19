@@ -88,8 +88,7 @@ def load(path, act_params=None):
 def learn(env,
           q_func,
           lr=5e-4,
-          lr_decay_factor = 0.99,
-          lr_growth_factor = 1.01,
+          lr_period=50000,
           max_timesteps=100000,
           buffer_size=50000,
           exploration_fraction=0.1,
@@ -102,15 +101,8 @@ def learn(env,
           learning_starts=1000,
           gamma=1.0,
           target_network_update_freq=500,
-          prioritized_replay=False,
-          prioritized_replay_alpha=0.6,
-          prioritized_replay_beta0=0.4,
-          prioritized_replay_beta_iters=None,
-          prioritized_replay_eps=1e-6,
-          param_noise=False,
           callback=None,
           scope="madeepq",
-          double_q=False,
           epoch_steps=20000,
           eval_logger=None,
           save_dir='.',
@@ -217,20 +209,17 @@ def learn(env,
     target_network_update_rate = np.minimum(target_network_update_freq, 1.0)
     target_network_update_freq = np.maximum(target_network_update_freq, 1.0)
 
-    act, act_test, q_values, train, update_target, lr_decay_op, lr_growth_op, _ = madeepq.build_train(
+    act, act_test, q_values, train, update_target, _ = madeepq.build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
         num_actions=env.action_space.n,
         optimizer_f=tf.compat.v1.train.AdamOptimizer,
         gamma=gamma,
-        grad_norm_clipping=10,
-        param_noise=param_noise,
-        double_q=bool(double_q),
+        grad_norm_clipping=5,
         scope=scope,
         test_eps=test_eps,
         lr_init=lr,
-        lr_decay_factor=lr_decay_factor,
-        lr_growth_factor=lr_growth_factor,
+        lr_period=lr_period,
         reuse=tf.compat.v1.AUTO_REUSE,
         tau=target_network_update_rate,
     )
@@ -244,16 +233,8 @@ def learn(env,
     act = ActWrapper(act, act_params)
 
     # Create the replay buffer
-    if prioritized_replay:
-        replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
-        if prioritized_replay_beta_iters is None:
-            prioritized_replay_beta_iters = max_timesteps
-        beta_schedule = LinearSchedule(prioritized_replay_beta_iters,
-                                       initial_p=prioritized_replay_beta0,
-                                       final_p=1.0)
-    else:
-        replay_buffer = ReplayBuffer(buffer_size)
-        beta_schedule = None
+    replay_buffer = ReplayBuffer(buffer_size)
+    beta_schedule = None
     # Create the schedule for exploration starting from 1.
     exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * max_timesteps),
                                  initial_p=1.0,
@@ -288,19 +269,7 @@ def learn(env,
                 break
             # Take action and update exploration to the newest value
             kwargs = {}
-            if not param_noise:
-                update_eps = exploration.value(t)
-                update_param_noise_threshold = 0.
-            else:
-                update_eps = 0.
-                # Compute the threshold such that the KL divergence between perturbed and non-perturbed
-                # policy is comparable to eps-greedy exploration with eps = exploration.value(t).
-                # See Appendix C.1 in Parameter Space Noise for Exploration, Plappert et al., 2017
-                # for detailed explanation.
-                update_param_noise_threshold = -np.log(1. - exploration.value(t) + exploration.value(t) / float(env.action_space.n))
-                kwargs['reset'] = reset
-                kwargs['update_param_noise_threshold'] = update_param_noise_threshold
-                kwargs['update_param_noise_scale'] = True
+            update_eps = exploration.value(t)
 
             action_dict = {}
             for agent_id, a_obs in obs.items():
@@ -324,21 +293,22 @@ def learn(env,
 
             if t > learning_starts and (t+1) % train_freq == 0:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
-                if prioritized_replay:
-                    experience = replay_buffer.sample(batch_size, beta=beta_schedule.value(t))
-                    (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
-                else:
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
-                    weights, batch_idxes = np.ones_like(rewards), None
+                obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
+                weights, batch_idxes = np.ones_like(rewards), None
 
-                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                #Update with cosine learning rate   
+                if t < max_timesteps/5:
+                    lr_iter = 0
+                elif t < max_timesteps*7/10:
+                    lr_iter = t-max_timesteps/5
+                else: 
+                    lr_iter = lr_period
+
+                td_errors, td_errors2, loss, summary = train(obses_t, actions, rewards, obses_tp1, dones, weights, lr_iter)
 
                 file_writer.add_summary(summary, t)
                 eval_logger.log_step(loss=loss)
 
-                if prioritized_replay:
-                    new_priorities = np.abs(td_errors) + prioritized_replay_eps
-                    replay_buffer.update_priorities(batch_idxes, new_priorities)
                 if render:
                     env.render()
 
@@ -352,15 +322,9 @@ def learn(env,
             if (checkpoint_freq is not None and t > learning_starts and
                     (t+1) % checkpoint_freq == 0 and eval_logger.get_num_episode() > 10):
                 mean_loss = np.float16(np.mean(eval_logger.ep_history['loss']))
-                if len(checkpt_loss) > 2 and mean_loss > np.float16(max(checkpt_loss[-3:])) and lr_decay_factor < 1.0:
-                    sess.run(lr_decay_op)
-                    print("Learning rate decayed due to an increase in loss: %.4f -> %.4f"%(np.float16(max(checkpt_loss[-3:])),mean_loss))
-                elif len(checkpt_loss) > 2 and mean_loss < np.float16(min(checkpt_loss[-3:])) and lr_growth_factor > 1.0:
-                    sess.run(lr_growth_op)
-                    print("Learning rate grown due to a decrease in loss: %.4f -> %.4f"%( np.float16(min(checkpt_loss[-3:])),mean_loss))
                 checkpt_loss.append(mean_loss)
                 # print("Saving model to model_%d.pkl"%(t+1))
-                # act.save(os.path.join(save_dir,"model_"+str(t+1)+".pkl"))
+                act.save(os.path.join(save_dir,"modellast.pkl"))
                 mean_100ep_reward = eval_logger.get_100ep_reward()
                 if saved_mean_reward is None or mean_100ep_reward > saved_mean_reward:
                     if print_freq is not None:
