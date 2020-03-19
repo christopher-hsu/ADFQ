@@ -357,12 +357,29 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer_f,
         errors = errors1 + errors2
         weighted_error = tf.reduce_mean(input_tensor=importance_weights_ph * errors)
 
+        #Print total number of params
+        total_parameters = 0
+        for variable in tf.compat.v1.trainable_variables():
+            # shape is an array of tf.Dimension
+            shape = variable.get_shape()
+            variable_parameters = 1
+            for dim in shape:
+                variable_parameters *= dim.value
+            # print("var params", variable_parameters)
+            total_parameters += variable_parameters
+        print("===============================================================")
+        print("Total number of trainable params:", total_parameters)
+        print("===============================================================")
+
         # Log for tensorboard
         tf.summary.scalar('q1_values', tf.math.reduce_mean(q1_t))
         tf.summary.scalar('q2_values', tf.math.reduce_mean(q2_t))
+        tf.summary.scalar('td_1', tf.math.reduce_mean(td_error1))
+        tf.summary.scalar('td_2', tf.math.reduce_mean(td_error2))
+        tf.summary.scalar('weighted_loss', weighted_error)
+        tf.summary.scalar('lr_schedule', lr)
         tf.summary.scalar('td_MSE_1', tf.math.reduce_mean(tf.math.square(td_error1)))
         tf.summary.scalar('td_MSE_2', tf.math.reduce_mean(tf.math.square(td_error2)))
-        tf.summary.scalar('weighted_loss', weighted_error)
 
         # combine variable scopes
         q_func_vars = q1_func_vars+q2_func_vars
