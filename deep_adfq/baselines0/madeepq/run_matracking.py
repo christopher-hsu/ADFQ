@@ -15,7 +15,7 @@ import envs
 from baselines0.madeepq.logger import Logger, batch_plot
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--env', help='environment ID', default='maTracking-v2')
+parser.add_argument('--env', help='environment ID', default='maTracking-v1')
 parser.add_argument('--seed', help='RNG seed', type=int, default=0)
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
 parser.add_argument('--nb_train_steps', type=int, default=100000)
