@@ -14,8 +14,7 @@ class ReplayBuffer(object):
             Max number of transitions to store in the buffer. When the buffer
             overflows the old memories are dropped.
         """
-        self._storage = []
-        self._nb_targ_idxs = []
+        self._storage = {}
         self._maxsize = size
         self._next_idx = 0
 
@@ -24,19 +23,24 @@ class ReplayBuffer(object):
 
     def add(self, obs_t, action, reward, obs_tp1, done, nb_targets):
         data = (obs_t, action, reward, obs_tp1, done)
-
         if self._next_idx >= len(self._storage):
-            self._storage.append(data)
-            self._nb_targ_idxs.append(nb_targets)
+            try:
+                self._storage[nb_targets].append(data)
+            except:
+                self._storage[nb_targets] = []
+                self._storage[nb_targets].append(data)
         else:
-            self._storage[self._next_idx] = data
-            self._nb_targ_idxs[self._next_idx] = nb_targets
+            try:
+                self._storage[nb_targets][self._next_idx] = data
+            except:
+                self._storage[nb_targets] = []
+                self._storage[nb_targets][self._next_idx] = data
         self._next_idx = int((self._next_idx + 1) % self._maxsize)
 
-    def _encode_sample(self, idxes):
+    def _encode_sample(self, idxes, nb_targets):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
         for i in idxes:
-            data = self._storage[i]
+            data = self._storage[nb_targets][i]
             obs_t, action, reward, obs_tp1, done = data
             obses_t.append(np.array(obs_t, copy=False))
             actions.append(np.array(action, copy=False))
@@ -70,10 +74,8 @@ class ReplayBuffer(object):
         """
 
         nb_targets = np.random.random_integers(1, num_targets)
-        targ_idxs = np.where(np.array(self._nb_targ_idxs)==nb_targets)[0]
-        idxes = [targ_idxs[random.randint(0, len(targ_idxs) - 1)] for _ in range(batch_size)]
-        # idxes = [random.randint(0, len(self._storage) - 1) for _ in range(batch_size)]
-        return self._encode_sample(idxes)
+        idxes = [random.randint(0, len(self._storage[nb_targets]) - 1) for _ in range(batch_size)]
+        return self._encode_sample(idxes, nb_targets)
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
