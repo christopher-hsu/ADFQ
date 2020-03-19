@@ -86,7 +86,7 @@ def train(seed, save_dir):
                 exploration_final_eps=args.eps_min,
                 target_network_update_freq=args.target_update_freq,
                 print_freq=10,
-                checkpoint_freq=int(args.nb_train_steps/10),
+                checkpoint_freq=args.checkpoint_freq,
                 learning_starts=args.nb_warmup_steps,
                 gamma = args.gamma,
                 callback=None,#callback,
