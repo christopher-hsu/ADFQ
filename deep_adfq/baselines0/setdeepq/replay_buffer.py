@@ -22,19 +22,18 @@ class ReplayBuffer(object):
         return len(self._storage)
 
     def add(self, obs_t, action, reward, obs_tp1, done, nb_targets):
+        try:
+            len(self._storage[nb_targets])
+        except:
+            self._storage[nb_targets] = []
+        
         data = (obs_t, action, reward, obs_tp1, done)
-        if self._next_idx >= len(self._storage):
-            try:
-                self._storage[nb_targets].append(data)
-            except:
-                self._storage[nb_targets] = []
-                self._storage[nb_targets].append(data)
+        
+        if self._next_idx >= len(self._storage[nb_targets]):
+            self._storage[nb_targets].append(data)
         else:
-            try:
-                self._storage[nb_targets][self._next_idx] = data
-            except:
-                self._storage[nb_targets] = []
-                self._storage[nb_targets][self._next_idx] = data
+            self._storage[nb_targets][self._next_idx] = data
+
         self._next_idx = int((self._next_idx + 1) % self._maxsize)
 
     def _encode_sample(self, idxes, nb_targets):
