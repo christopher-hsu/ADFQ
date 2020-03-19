@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument('--env', help='environment ID', default='setTracking-v3')
 parser.add_argument('--seed', help='RNG seed', type=int, default=0)
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
-parser.add_argument('--nb_train_steps', type=int, default=1000000)
+parser.add_argument('--nb_train_steps', type=int, default=500000)
 parser.add_argument('--buffer_size', type=int, default=int(1e6))
 parser.add_argument('--batch_size', type=int, default=256)
 parser.add_argument('--nb_warmup_steps', type=int, default=20000)
