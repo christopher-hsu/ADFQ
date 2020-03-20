@@ -37,6 +37,30 @@ def batch():
         seed += 1
     logger.batch_plot(list_records, save_dir, args.nb_train_steps, args.nb_epoch_steps, is_target_tracking=True)
 
+def eval():
+    eval_seed = 'seed0'
+    list_records = []
+    seed = args.seed
+    save_dir = args.log_dir
+    for ii in range(args.repeat):
+        list_records.append(pickle.load(open(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map,'all_'+args.nb_test_steps+"_evalseed_%d"%seed+'.pkl'),'rb')))
+        seed +=1
+    mean = np.mean(list_records,axis=0)
+    std = np.std(list_records,axis=0)
+    upstd = mean + 0.5*std
+    downstd = mean - 0.5*std
+
+    f0, ax0 = plt.subplots()
+    plt.subplots_adjust(left=0.2, bottom=0.2)
+    _ = ax0.plot(mean)
+    _ = ax0.fill_between(range(len(mean)), upstd, downstd,
+                    facecolor='k', alpha=0.2)
+    _ = ax0.grid()
+    _ = ax0.table(np.vstack((mean,std)))
+    _ = ax0.axes.get_xaxis().set_visible(False)
+    _ = f0.savefig(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, 'allseedsEval'))
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -45,9 +69,14 @@ if __name__ == '__main__':
     parser.add_argument('--repeat', help='number of seeds increment', type=int, default=3)
     parser.add_argument('--nb_train_steps', type=int, default=150000)
     parser.add_argument('--nb_epoch_steps', type=int, default=5000)
-    parser.add_argument('--batch', type=bool, default=1)
+    parser.add_argument('--nb_test_steps', type=str, default='100')
+    parser.add_argument('--batch', type=bool, default=0)
+    parser.add_argument('--eval', type=bool, default=1)
+    parser.add_argument('--map', type=str, default='emptyMed')
     args = parser.parse_args()
     if args.batch:
         batch()
+    elif args.eval:
+        eval()
     else:
         contour()
