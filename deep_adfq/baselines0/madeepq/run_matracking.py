@@ -29,7 +29,7 @@ parser.add_argument('--nb_test_steps',type=int, default = None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_period', type=float, default=0.6) #Back half portion with cosine lr schedule
 parser.add_argument('--gamma', type=float, default=.99)
-parser.add_argument('--hiddens', type=str, default='64:128:64')
+parser.add_argument('--hiddens', type=str, default='256:256:256')
 parser.add_argument('--log_dir', type=str, default='.')
 parser.add_argument('--log_fname', type=str, default='model.pkl')
 parser.add_argument('--eps_fraction', type=float, default=0.1)
