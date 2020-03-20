@@ -46,7 +46,7 @@ parser.add_argument('--ros_log', type=int, default=0)
 parser.add_argument('--map', type=str, default="emptyMed")
 parser.add_argument('--nb_agents', type=int, default=2)
 parser.add_argument('--nb_targets', type=int, default=2)
-parser.add_argument('--eval_type', choices=['random', 'random_zone', 'fixed'], default='random')
+parser.add_argument('--eval_type', choices=['random', 'random_zone', 'fixed', 'fixed_nb'], default='random')
 parser.add_argument('--init_file_path', type=str, default=".")
 
 args = parser.parse_args()

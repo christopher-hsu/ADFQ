@@ -27,6 +27,8 @@ class Test:
                 params_set = SET_EVAL_v4
             elif args.env == 'setTracking-v5':
                 params_set = SET_EVAL_v4
+            elif args.env == 'maTracking-v4':
+                params_set = MA_EVAL
             else:
                 raise ValueError("Eval set not created for this env.")
         else:
@@ -81,8 +83,10 @@ class Test:
             meanofeps = np.mean(ep_nlogdetcov)
             total_nlogdetcov.append(meanofeps)
             # Eval plots and saves
-            eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
-            model_seed = os.path.split(args.log_fname)[0]
+            eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'eval_seed%d_'%(seed)+args.map)
+            model_seed = os.path.split(args.log_dir)[-1]           
+            # eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
+            # model_seed = os.path.split(args.log_fname)[0]
             if not os.path.exists(eval_dir):
                 os.makedirs(eval_dir)
             matplotlib.use('Agg')
@@ -115,26 +119,26 @@ SET_EVAL_v3 = [{
         'nb_agents': 1,
         'nb_targets': 1
         },
-        {
-        'nb_agents': 1,
-        'nb_targets': 2
-        },
-        {
-        'nb_agents': 2,
-        'nb_targets': 2
-        },
+        # {
+        # 'nb_agents': 1,
+        # 'nb_targets': 2
+        # },
         {
         'nb_agents': 2,
-        'nb_targets': 3
+        'nb_targets': 2
         },
+        # {
+        # 'nb_agents': 2,
+        # 'nb_targets': 3
+        # },
         {
         'nb_agents': 3,
         'nb_targets': 3,
         },
-        {
-        'nb_agents': 3,
-        'nb_targets': 4
-        },
+        # {
+        # 'nb_agents': 3,
+        # 'nb_targets': 4
+        # },
         {
         'nb_agents': 4,
         'nb_targets': 4
@@ -156,5 +160,19 @@ SET_EVAL_v4 = [{
         {
         'nb_agents': 2,
         'nb_targets': 4
+        }
+]
+
+MA_EVAL = [{
+        'nb_agents': 1,
+        },
+        {
+        'nb_agents': 2,
+        },
+        {
+        'nb_agents': 3,
+        },
+        {
+        'nb_agents': 4,
         }
 ]
