@@ -28,7 +28,7 @@ parser.add_argument('--checkpoint_freq', type=int, default=5000)
 parser.add_argument('--target_update_freq', type=float, default=0.005) #tau in polyak averaging
 parser.add_argument('--nb_test_steps',type=int, default=None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
-parser.add_argument('--learning_rate_period', type=float, default=0.4) #Back half portion with cosine lr schedule
+parser.add_argument('--learning_rate_period', type=float, default=0.6) #Back half portion with cosine lr schedule
 parser.add_argument('--gamma', type=float, default=.99)
 parser.add_argument('--hiddens', type=str, default='100:100') #encoder and decoder dim, respectively
 parser.add_argument('--log_dir', type=str, default='.')
