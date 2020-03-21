@@ -230,6 +230,10 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
                 params_set = SET_EVAL_v4
             elif env_id == 'setTracking-v5':
                 params_set = SET_EVAL_v4
+            elif env_id == 'setTracking-v6':
+                params_set = SET_EVAL_v3
+            elif env_id == 'setTracking-v7':
+                params_set = SET_EVAL_v3
             else:
                 raise ValueError("Eval set not created for this env.")
     elif eval_type == 'fixed':
