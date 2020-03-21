@@ -23,17 +23,17 @@ parser.add_argument('--nb_train_steps', type=int, default=500000)
 parser.add_argument('--buffer_size', type=int, default=int(1e6))
 parser.add_argument('--batch_size', type=int, default=256)
 parser.add_argument('--nb_warmup_steps', type=int, default=20000)
-parser.add_argument('--nb_epoch_steps', type=int, default=25000)
-parser.add_argument('--checkpoint_freq', type=int, default=5000)
-parser.add_argument('--target_update_freq', type=float, default=0.005) #tau in polyak averaging
+parser.add_argument('--nb_epoch_steps', type=int, default=20000)
+parser.add_argument('--checkpoint_freq', type=int, default=10000)
+parser.add_argument('--target_update_freq', type=float, default=0.001) #tau in polyak averaging
 parser.add_argument('--nb_test_steps',type=int, default=None)
 parser.add_argument('--learning_rate', type=float, default=0.001)
-parser.add_argument('--learning_rate_period', type=float, default=0.6) #Back half portion with cosine lr schedule
+parser.add_argument('--learning_rate_period', type=float, default=0.7) #Back half portion with cosine lr schedule
 parser.add_argument('--gamma', type=float, default=.99)
 parser.add_argument('--hiddens', type=str, default='100:100') #encoder and decoder dim, respectively
 parser.add_argument('--log_dir', type=str, default='.')
 parser.add_argument('--log_fname', type=str, default='model.pkl')
-parser.add_argument('--eps_fraction', type=float, default=0.1)
+parser.add_argument('--eps_fraction', type=float, default=0.15)
 parser.add_argument('--eps_min', type=float, default=.02)
 parser.add_argument('--test_eps', type=float, default=.05)
 parser.add_argument('--device', type=str, default='/gpu:0')
