@@ -56,9 +56,9 @@ def eval():
     _ = ax0.fill_between(range(len(mean)), upstd, downstd,
                     facecolor='k', alpha=0.2)
     _ = ax0.grid()
-    _ = ax0.table(np.vstack((mean,std)))
+    _ = ax0.table(np.vstack((mean.round(4),std.round(4))))
     _ = ax0.axes.get_xaxis().set_visible(False)
-    _ = f0.savefig(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, 'allseedsEval'))
+    _ = f0.savefig(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, '0allseedsEval'))
 
 
 

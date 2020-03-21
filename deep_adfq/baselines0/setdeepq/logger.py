@@ -86,6 +86,9 @@ class Logger():
     def get_100ep_reward(self):
         return round(np.mean(self.ep_history['ep_rewards'][-101:-1]), 1)
 
+    def get_eval_reward(self):
+        return round(np.mean(self.records['test_reward'][-1]), 1)
+
     def get_num_episode(self):
         return len(self.ep_history['ep_rewards'])
 
