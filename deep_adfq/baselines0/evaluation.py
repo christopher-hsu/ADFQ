@@ -87,7 +87,10 @@ class Test:
             meanofeps = np.mean(ep_nlogdetcov)
             total_nlogdetcov.append(meanofeps)
             # Eval plots and saves
-            eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'eval_seed%d_'%(seed)+args.map)
+            if args.env == 'setTracking-v7':
+                eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'v7_eval_seed%d_'%(seed)+args.map)
+            else:
+                eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'eval_seed%d_'%(seed)+args.map)
             model_seed = os.path.split(args.log_dir)[-1]           
             # eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
             # model_seed = os.path.split(args.log_fname)[0]
