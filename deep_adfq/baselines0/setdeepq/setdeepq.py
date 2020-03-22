@@ -318,18 +318,15 @@ def learn(env,
                 checkpt_loss.append(mean_loss)
                 # print("Saving current model to modellast.pkl")
                 act.save(os.path.join(save_dir,"modellast.pkl"))
-                # mean_100ep_reward = eval_logger.get_100ep_reward()
+
+                # Save the best model based on evaluation sets
                 mean_eval_reward = eval_logger.get_eval_reward()
-                # Save the best model based on 100 ep reward increases
-                # if saved_mean_reward is None or mean_100ep_reward > saved_mean_reward:
                 if saved_mean_reward is None or mean_eval_reward > saved_mean_reward:
                     if print_freq is not None:
                         logger.log("Saving model due to mean reward increase: {} -> {}".format(
                                     saved_mean_reward, mean_eval_reward))
-                                   # saved_mean_reward, mean_100ep_reward))
                     save_state(model_file)
                     model_saved = True
-                    # saved_mean_reward = mean_100ep_reward
                     saved_mean_reward = mean_eval_reward
 
         if model_saved:
