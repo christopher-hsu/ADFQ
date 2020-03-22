@@ -60,6 +60,28 @@ def eval():
     _ = ax0.axes.get_xaxis().set_visible(False)
     _ = f0.savefig(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, '0allseedsEval'))
 
+def v7eval():
+    eval_seed = 'seed0'
+    list_records = []
+    seed = args.seed
+    save_dir = args.log_dir
+    for ii in range(args.repeat):
+        list_records.append(pickle.load(open(os.path.join(save_dir, 'v7_eval_'+eval_seed+"_"+args.map,'all_'+args.nb_test_steps+"_evalseed_%d"%seed+'.pkl'),'rb')))
+        seed +=1
+    mean = np.mean(list_records,axis=0)
+    std = np.std(list_records,axis=0)
+    upstd = mean + 0.5*std
+    downstd = mean - 0.5*std
+
+    f0, ax0 = plt.subplots()
+    plt.subplots_adjust(left=0.2, bottom=0.2)
+    _ = ax0.plot(mean)
+    _ = ax0.fill_between(range(len(mean)), upstd, downstd,
+                    facecolor='k', alpha=0.2)
+    _ = ax0.grid()
+    _ = ax0.table(np.vstack((mean.round(4),std.round(4))))
+    _ = ax0.axes.get_xaxis().set_visible(False)
+    _ = f0.savefig(os.path.join(save_dir, 'v7_eval_'+eval_seed+"_"+args.map, '0allseedsEval'))
 
 
 if __name__ == '__main__':
@@ -71,12 +93,15 @@ if __name__ == '__main__':
     parser.add_argument('--nb_epoch_steps', type=int, default=5000)
     parser.add_argument('--nb_test_steps', type=str, default='100')
     parser.add_argument('--batch', type=bool, default=0)
-    parser.add_argument('--eval', type=bool, default=1)
+    parser.add_argument('--eval', type=bool, default=0)
+    parser.add_argument('--v7', type=bool, default=0)
     parser.add_argument('--map', type=str, default='emptyMed')
     args = parser.parse_args()
     if args.batch:
         batch()
     elif args.eval:
         eval()
+    elif args.v7:
+        v7eval()
     else:
         contour()
