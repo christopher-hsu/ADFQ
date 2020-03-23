@@ -111,8 +111,8 @@ class Logger():
                     _ = ax0.plot(x_vals[-len(v):], m, color='b')
                     _ = ax0.fill_between(x_vals[-len(v):], list(ids75),
                                         list(ids25), facecolor='b', alpha=0.2)
-                    if k == 'mean_nlogdetcov':
-                        _ = ax0.set_ylim(-1500, 3000)
+                    # if k == 'mean_nlogdetcov':
+                    #     _ = ax0.set_ylim(-1500, 3000)
                     _ = ax0.grid()
                     _ = ax0.set_ylabel(k)
                     _ = ax0.set_xlabel('Learning Steps')
@@ -133,8 +133,8 @@ class Logger():
                 else:
                     _ = ax0.plot(x_vals[-len(v):], v, color='b')
 
-                if k == 'mean_nlogdetcov':
-                    _ = ax0.set_ylim(-1500, 3000)
+                # if k == 'mean_nlogdetcov':
+                #     _ = ax0.set_ylim(-1500, 3000)
                 _ = ax0.grid()
                 _ = ax0.set_ylabel(k)
                 _ = ax0.set_xlabel('Learning Steps')
@@ -282,8 +282,8 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
                 _ = ax0.plot(x_vals[-v_i.shape[1]:], np.max(v_i, axis=0), color='b')
                 _ = ax0.plot(x_vals[-v_i.shape[1]:], np.min(v_i, axis=0), color='r')
                 _ = ax0.grid()
-                if k == 'mean_nlogdetcov':
-                    ax0.set_ylim(-1500, 5000)
+                # if k == 'mean_nlogdetcov':
+                #     ax0.set_ylim(-1500, 5000)
                 _ = f0.savefig(os.path.join(save_dir, "%s_eval_%d.png"%(k,i)))
                 plt.close()
         else:
@@ -297,8 +297,8 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             _ = ax0.plot(x_vals[-v.shape[1]:], np.max(v, axis=0), color='b')
             _ = ax0.plot(x_vals[-v.shape[1]:], np.min(v, axis=0), color='r')
             _ = ax0.grid()
-            if k == 'mean_nlogdetcov':
-                ax0.set_ylim(-1500, 5000)
+            # if k == 'mean_nlogdetcov':
+            #     ax0.set_ylim(-1500, 5000)
             _ = f0.savefig(os.path.join(save_dir, k+".png"))
             plt.close()
 
