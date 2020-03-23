@@ -15,14 +15,6 @@ class Test:
         env.seed(seed)
         set_global_seeds(seed)
 
-        config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
-        config.gpu_options.per_process_gpu_memory_fraction = args.gpu_memory
-        config.gpu_options.polling_inactive_delay_msecs = 25
-        config.intra_op_parallelism_threads = 4
-        config.inter_op_parallelism_threads = 4
-        sess = tf.compat.v1.Session(config=config)
-        sess.__enter__()
-
         if args.eval_type == 'random':
             params_set = [{}]
         elif args.eval_type == 'fixed_nb':
