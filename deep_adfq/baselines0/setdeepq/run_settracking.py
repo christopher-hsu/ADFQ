@@ -128,13 +128,13 @@ def test(seed):
                     num_targets=args.nb_targets, #learning_prop['nb_targets'],
                     is_training=False,
                     )
+    with tf.device(args.device):
+        act_params = {'scope': "seed_%d"%learning_prop['seed']+"/"+learning_prop['scope'], 'eps': args.test_eps}
+        act = setdeepq.load(os.path.join(args.log_dir, args.log_fname), act_params)
 
-    act_params = {'scope': "seed_%d"%learning_prop['seed']+"/"+learning_prop['scope'], 'eps': args.test_eps}
-    act = setdeepq.load(os.path.join(args.log_dir, args.log_fname), act_params)
-
-    from baselines0.evaluation import Test
-    Eval = Test()
-    Eval.test(args, env, act)
+        from baselines0.evaluation import Test
+        Eval = Test()
+        Eval.test(args, env, act)
 
 if __name__ == '__main__':
     if args.mode == 'train':
