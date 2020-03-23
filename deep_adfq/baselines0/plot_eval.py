@@ -91,7 +91,7 @@ if __name__ == '__main__':
     parser.add_argument('--repeat', help='number of seeds increment', type=int, default=3)
     parser.add_argument('--nb_train_steps', type=int, default=150000)
     parser.add_argument('--nb_epoch_steps', type=int, default=5000)
-    parser.add_argument('--nb_test_steps', type=str, default='100')
+    parser.add_argument('--nb_test_steps', type=str, default='50')
     parser.add_argument('--batch', type=bool, default=0)
     parser.add_argument('--eval', type=bool, default=0)
     parser.add_argument('--v7', type=bool, default=0)
