@@ -6,6 +6,7 @@ in the original directory.
 import argparse
 import tensorflow as tf
 import datetime, json, os, argparse, time, pickle
+os.environ['OPENBLAS_NUM_THREADS'] = '2'
 import numpy as np
 
 from baselines0.common import set_global_seeds

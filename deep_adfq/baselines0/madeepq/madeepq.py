@@ -184,6 +184,8 @@ def learn(env,
     config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
     config.gpu_options.per_process_gpu_memory_fraction = gpu_memory
     config.gpu_options.polling_inactive_delay_msecs = 25
+    config.intra_op_parallelism_threads = 4
+    config.inter_op_parallelism_threads = 4
     sess = tf.compat.v1.Session(config=config)
     sess.__enter__()
 
