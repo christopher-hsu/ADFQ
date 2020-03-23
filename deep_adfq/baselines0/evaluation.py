@@ -123,64 +123,35 @@ class Test:
         pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'.pkl', 'wb'))
 
 
-SET_EVAL_v3 = [{
-        'nb_agents': 1,
-        'nb_targets': 1
-        },
-        # {
-        # 'nb_agents': 1,
-        # 'nb_targets': 2
-        # },
-        {
-        'nb_agents': 2,
-        'nb_targets': 2
-        },
-        # {
-        # 'nb_agents': 2,
-        # 'nb_targets': 3
-        # },
-        {
-        'nb_agents': 3,
-        'nb_targets': 3,
-        },
-        # {
-        # 'nb_agents': 3,
-        # 'nb_targets': 4
-        # },
-        {
-        'nb_agents': 4,
-        'nb_targets': 4
-        }
+SET_EVAL_v3 = [
+        {'nb_agents': 1, 'nb_targets': 1},
+        {'nb_agents': 1, 'nb_targets': 2},
+        {'nb_agents': 1, 'nb_targets': 3},
+        {'nb_agents': 1, 'nb_targets': 4},
+        {'nb_agents': 2, 'nb_targets': 1},
+        {'nb_agents': 2, 'nb_targets': 2},
+        {'nb_agents': 2, 'nb_targets': 3},
+        {'nb_agents': 2, 'nb_targets': 4},
+        {'nb_agents': 3, 'nb_targets': 1},
+        {'nb_agents': 3, 'nb_targets': 2},
+        {'nb_agents': 3, 'nb_targets': 3},
+        {'nb_agents': 3, 'nb_targets': 4},
+        {'nb_agents': 4, 'nb_targets': 1},
+        {'nb_agents': 4, 'nb_targets': 2},
+        {'nb_agents': 4, 'nb_targets': 3},
+        {'nb_agents': 4, 'nb_targets': 4},
 ]
 
-SET_EVAL_v4 = [{
-        'nb_agents': 2,
-        'nb_targets': 1
-        },
-        {
-        'nb_agents': 2,
-        'nb_targets': 2
-        },
-        {
-        'nb_agents': 2,
-        'nb_targets': 3
-        },
-        {
-        'nb_agents': 2,
-        'nb_targets': 4
-        }
+SET_EVAL_v4 = [
+        {'nb_agents': 2,'nb_targets': 1},
+        {'nb_agents': 2,'nb_targets': 2},
+        {'nb_agents': 2,'nb_targets': 3},
+        {'nb_agents': 2,'nb_targets': 4}
 ]
 
-MA_EVAL = [{
-        'nb_agents': 1,
-        },
-        {
-        'nb_agents': 2,
-        },
-        {
-        'nb_agents': 3,
-        },
-        {
-        'nb_agents': 4,
-        }
+MA_EVAL = [
+        {'nb_agents': 1},
+        {'nb_agents': 2},
+        {'nb_agents': 3},
+        {'nb_agents': 4}
 ]
