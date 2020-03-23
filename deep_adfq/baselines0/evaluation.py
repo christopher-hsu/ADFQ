@@ -4,6 +4,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from baselines0.common import set_global_seeds
+import tensorflow as tf
 
 class Test:
     def __init__(self):
