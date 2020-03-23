@@ -220,6 +220,9 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
         params_set = MATTENV_EVAL_SET
     elif eval_type == 'fixed':
         params_set = [{'init_pose_list':kwargs['init_pose_list']}]
+    elif eval_type == 'fixed_nb':
+        if env_id == 'maTracking-v4':
+            params_set = MA_EVAL
     else:
         raise ValueError("Wrong evaluation type for ttenv.")
 
@@ -298,6 +301,20 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
                 ax0.set_ylim(-1500, 5000)
             _ = f0.savefig(os.path.join(save_dir, k+".png"))
             plt.close()
+
+MA_EVAL = [{
+        'nb_agents': 1,
+        },
+        {
+        'nb_agents': 2,
+        },
+        {
+        'nb_agents': 3,
+        },
+        {
+        'nb_agents': 4,
+        }
+]
 
 MATTENV_EVAL_SET = [{
         'lin_dist_range':(5.0, 10.0),
