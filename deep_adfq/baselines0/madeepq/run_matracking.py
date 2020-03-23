@@ -143,7 +143,7 @@ if __name__ == '__main__':
             os.makedirs(save_dir)
         else:
             ValueError("The directory already exists...", save_dir)
-        json.dump(vars(args), open(os.path.join(save_dir, 'learning_prop.json'), 'w'))
+        # json.dump(vars(args), open(os.path.join(save_dir, 'learning_prop.json'), 'w'))
 
         notes = input("Any notes for this experiment? : ")
         f = open(os.path.join(save_dir, "notes.txt"), 'w')
@@ -155,8 +155,10 @@ if __name__ == '__main__':
         for _ in range(args.repeat):
             print("===== TRAIN A TARGET TRACKING RL AGENT : SEED %d ====="%seed)
             results = train(seed, save_dir)
+            json.dump(vars(args), open(os.path.join(save_dir, "seed_%d"%seed, 'learning_prop.json'), 'w'))
             list_records.append(pickle.load(open(os.path.join(save_dir, "seed_%d"%seed, "records.pkl"), "rb")))
             seed += 1
+            args.seed += 1
 
         batch_plot(list_records, save_dir, args.nb_train_steps,
             args.nb_epoch_steps, is_target_tracking=True)
