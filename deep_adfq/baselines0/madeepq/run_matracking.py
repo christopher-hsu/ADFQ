@@ -23,7 +23,7 @@ parser.add_argument('--nb_train_steps', type=int, default=200000)
 parser.add_argument('--buffer_size', type=int, default=int(1e6))
 parser.add_argument('--batch_size', type=int, default=128)
 parser.add_argument('--nb_warmup_steps', type=int, default=20000)
-parser.add_argument('--nb_epoch_steps', type=int, default=40000)
+parser.add_argument('--nb_epoch_steps', type=int, default=10000)
 parser.add_argument('--checkpoint_freq', type=int, default=10000)
 parser.add_argument('--target_update_freq', type=float, default=0.001) # This should be smaller than epoch_steps
 parser.add_argument('--nb_test_steps',type=int, default = None)
