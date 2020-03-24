@@ -76,6 +76,8 @@ class Test:
 
                 time_elapsed.append(time.time() - s_time)
                 ep_nlogdetcov.append(nlogdetcov)
+                if args.render:
+                    print("Ep.%d - Episode reward : %.2f, Episode nLogDetCov : %.2f"%(ep, episode_rew, nlogdetcov))
                 if ep % 50 == 0:
                     print("Ep.%d - Episode reward : %.2f, Episode nLogDetCov : %.2f"%(ep, episode_rew, nlogdetcov))
 
