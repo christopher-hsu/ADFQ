@@ -319,34 +319,23 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             plt.close()
 
 
-SET_EVAL_v3 = [{
-        'nb_agents': 1,
-        'nb_targets': 1
-        },
-        # {
-        # 'nb_agents': 1,
-        # 'nb_targets': 2
-        # },
-        {
-        'nb_agents': 2,
-        'nb_targets': 2
-        },
-        # {
-        # 'nb_agents': 2,
-        # 'nb_targets': 3
-        # },
-        {
-        'nb_agents': 3,
-        'nb_targets': 3,
-        },
-        # {
-        # 'nb_agents': 3,
-        # 'nb_targets': 4
-        # },
-        {
-        'nb_agents': 4,
-        'nb_targets': 4
-        }
+SET_EVAL_v3 = [
+        {'nb_agents': 1, 'nb_targets': 1},
+        {'nb_agents': 2, 'nb_targets': 1},
+        {'nb_agents': 3, 'nb_targets': 1},
+        {'nb_agents': 4, 'nb_targets': 1},
+        {'nb_agents': 1, 'nb_targets': 2},
+        {'nb_agents': 2, 'nb_targets': 2},
+        {'nb_agents': 3, 'nb_targets': 2},
+        {'nb_agents': 4, 'nb_targets': 2},
+        {'nb_agents': 1, 'nb_targets': 3},
+        {'nb_agents': 2, 'nb_targets': 3},
+        {'nb_agents': 3, 'nb_targets': 3},
+        {'nb_agents': 4, 'nb_targets': 3},
+        {'nb_agents': 1, 'nb_targets': 4},
+        {'nb_agents': 2, 'nb_targets': 4},
+        {'nb_agents': 3, 'nb_targets': 4},
+        {'nb_agents': 4, 'nb_targets': 4},
 ]
 
 SET_EVAL_v4 = [{
