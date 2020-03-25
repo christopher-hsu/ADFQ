@@ -50,7 +50,7 @@ def eval():
     upstd = mean + 0.5*std
     downstd = mean - 0.5*std
 
-    f0, ax0 = plt.subplots()
+    f0, ax0 = plt.subplots(figsize=(20,10))
     plt.subplots_adjust(left=0.2, bottom=0.2)
     _ = ax0.plot(mean)
     _ = ax0.fill_between(range(len(mean)), upstd, downstd,
@@ -73,7 +73,7 @@ def v7eval():
     upstd = mean + 0.5*std
     downstd = mean - 0.5*std
 
-    f0, ax0 = plt.subplots()
+    f0, ax0 = plt.subplots(figsize=(20,10))
     plt.subplots_adjust(left=0.2, bottom=0.2)
     _ = ax0.plot(mean)
     _ = ax0.fill_between(range(len(mean)), upstd, downstd,
