@@ -6,13 +6,16 @@ import pickle, tabulate, os, argparse
 from baselines0.setdeepq import logger
 
 def contour():
+    setv3 = []
+    eval_seed = 'seed5'
+    save_dir = args.log_dir
+    seed = 0
+    for ii in range(args.repeat):
+        setv3.append(pickle.load(open(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, 'all_'+args.nb_test_steps+"_evalseed_%d"%seed+'.pkl'),'rb')))
+        seed +=1
+    mean = np.mean(setv3,axis=0)
+    mean = np.reshape(np.asarray(mean),(4,4))
 
-    data1 = np.array([2176.30, 825.09, 710.07, 454.25])
-    data2 = np.array([2842.65, 1808.21, 1134.55, 690.46])
-    data3 = np.array([2908.38, 2102.65, 1392.37, 1143.18])
-    data4 = np.array([3133.18, 2159.98, 1575.53, 1286.16])
-
-    data = np.array([data1,data2,data3,data4]).T
 
     # setup the figure and axes
     fig = plt.figure(figsize=(8, 7))
@@ -21,7 +24,7 @@ def contour():
     x = np.arange(1,5)
     y = np.arange(1,5)
 
-    plt.contourf(x, y, data, 50, cmap="viridis")
+    plt.contourf(x, y, mean, 50, cmap="viridis")
 
     plt.ylabel('number of targets')
     plt.xlabel('number of agents')
@@ -38,7 +41,7 @@ def batch():
     logger.batch_plot(list_records, save_dir, args.nb_train_steps, args.nb_epoch_steps, is_target_tracking=True)
 
 def eval():
-    eval_seed = 'seed0'
+    eval_seed = 'seed5'
     list_records = []
     seed = args.seed
     save_dir = args.log_dir
@@ -61,7 +64,7 @@ def eval():
     _ = f0.savefig(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, '0allseedsEval'))
 
 def v7eval():
-    eval_seed = 'seed0'
+    eval_seed = 'seed5'
     list_records = []
     seed = args.seed
     save_dir = args.log_dir
