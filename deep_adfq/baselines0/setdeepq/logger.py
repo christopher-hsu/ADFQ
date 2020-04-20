@@ -225,7 +225,7 @@ def evaluation_maTTenv(act, env_id, eval_type='random', nb_itrs=5, render=False,
             elif env_id == 'setTracking-v2':
                 params_set = SET_EVAL_v4
             elif env_id == 'setTracking-v3':
-                params_set = SET_EVAL_v3
+                params_set = SET_EVAL_v3_8
             elif env_id == 'setTracking-v4':
                 params_set = SET_EVAL_v4
             elif env_id == 'setTracking-v5':
@@ -318,6 +318,26 @@ def batch_plot(list_records, save_dir, nb_train_steps, nb_epoch_steps, is_target
             _ = f0.savefig(os.path.join(save_dir, k+".png"))
             plt.close()
 
+
+SET_EVAL_v3_8 = [
+        {'nb_agents': 1, 'nb_targets': 1},
+        {'nb_agents': 2, 'nb_targets': 1},
+        {'nb_agents': 1, 'nb_targets': 2},
+        {'nb_agents': 2, 'nb_targets': 2},
+        {'nb_agents': 3, 'nb_targets': 2},
+        {'nb_agents': 2, 'nb_targets': 3},
+        {'nb_agents': 3, 'nb_targets': 3},
+        {'nb_agents': 4, 'nb_targets': 3},
+        {'nb_agents': 2, 'nb_targets': 4},
+        {'nb_agents': 3, 'nb_targets': 4},
+        {'nb_agents': 4, 'nb_targets': 4},
+        {'nb_agents': 4, 'nb_targets': 6},
+        {'nb_agents': 5, 'nb_targets': 5},
+        {'nb_agents': 6, 'nb_targets': 6},
+        {'nb_agents': 7, 'nb_targets': 7},  
+        {'nb_agents': 8, 'nb_targets': 6},
+        {'nb_agents': 8, 'nb_targets': 8},
+]
 
 SET_EVAL_v3 = [
         {'nb_agents': 1, 'nb_targets': 1},
