@@ -24,6 +24,7 @@ class Test:
                 params_set = SET_EVAL_v4
             elif args.env == 'setTracking-v3':
                 params_set = SET_EVAL_v3
+                # params_set = SET_EVAL_8a
             elif args.env == 'setTracking-v4':
                 params_set = SET_EVAL_v4
             elif args.env == 'setTracking-v5':
@@ -34,6 +35,7 @@ class Test:
                 params_set = SET_EVAL_v3
             elif args.env == 'setTracking-v7':
                 params_set = SET_EVAL_v3
+                # params_set = SET_EVAL_8a
             else:
                 raise ValueError("Eval set not created for this env.")
         else:
@@ -122,7 +124,16 @@ class Test:
         _ = ax1.grid()
         _ = f1.savefig(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps)+model_seed+'.png'))
         plt.close()        
-        pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'.pkl', 'wb'))
+        pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'%da%dt'%(args.nb_agents,args.nb_targets)+'.pkl', 'wb'))
+
+
+SET_EVAL_8a = [
+        {'nb_agents': 4, 'nb_targets': 4},
+        {'nb_agents': 6, 'nb_targets': 6},      
+        {'nb_agents': 8, 'nb_targets': 4},
+        {'nb_agents': 8, 'nb_targets': 6},
+        {'nb_agents': 8, 'nb_targets': 8},
+]
 
 
 SET_EVAL_v3 = [
@@ -152,8 +163,8 @@ SET_EVAL_v4 = [
 ]
 
 MA_EVAL = [
-        {'nb_agents': 1},
-        {'nb_agents': 2},
-        {'nb_agents': 3},
-        {'nb_agents': 4}
+        {'nb_agents': 4},
+        # {'nb_agents': 2},
+        # {'nb_agents': 3},
+        # {'nb_agents': 4}
 ]

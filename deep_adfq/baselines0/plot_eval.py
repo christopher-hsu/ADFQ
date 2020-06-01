@@ -11,24 +11,27 @@ def contour():
     save_dir = args.log_dir
     seed = 0
     for ii in range(args.repeat):
-        setv3.append(pickle.load(open(os.path.join(save_dir, 'eval_'+eval_seed+"_"+args.map, 'all_'+args.nb_test_steps+"_evalseed_%d"%seed+'.pkl'),'rb')))
+        setv3.append(pickle.load(open(os.path.join(save_dir, 'all_'+args.nb_test_steps+"_evalseed_%d"%seed+'.pkl'),'rb')))
         seed +=1
     mean = np.mean(setv3,axis=0)
     mean = np.reshape(np.asarray(mean),(4,4))
 
-
+    mean = (mean+3000)/9000
     # setup the figure and axes
     fig = plt.figure(figsize=(8, 7))
     # ax1 = fig.add_subplot(projection='3d')
 
     x = np.arange(1,5)
     y = np.arange(1,5)
-
-    plt.contourf(x, y, mean, 50, cmap="viridis")
-
-    plt.ylabel('number of targets')
-    plt.xlabel('number of agents')
-    plt.colorbar()
+    # import pdb;pdb.set_trace()
+    CS = plt.contourf(x, y, mean, 50, cmap="viridis", cbarlabel="normalized reward")
+    plt.xticks(x, fontsize=15)
+    plt.yticks(y, fontsize=15)
+    plt.ylabel('(m) number of targets', fontsize=15)
+    plt.xlabel('(n) number of agents', fontsize=15)
+    # plt.colorbar()
+    cbar = fig.colorbar(CS)
+    cbar.ax.set_ylabel('normalized reward', fontsize=15)
     plt.show()
 
 def batch():
