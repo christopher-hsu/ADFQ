@@ -132,7 +132,8 @@ def test(seed):
     act_params = {'scope': "seed_%d"%learning_prop['seed']+"/"+learning_prop['scope'], 'eps': args.test_eps}
     act = setdeepq.load(os.path.join(args.log_dir, args.log_fname), act_params)
 
-    from baselines0.evaluation import Test
+    # from baselines0.evaluation import Test
+    from baselines0.evaluation_behavior import Test
     Eval = Test()
     Eval.test(args, env, act)
 
