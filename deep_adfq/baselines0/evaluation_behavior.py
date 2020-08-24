@@ -58,14 +58,17 @@ class Test:
 
             while(ep < args.nb_test_steps): # test episode
                 ep += 1
-                episode_rew, nlogdetcov = 0, 0
+                episode_rew, nlogdetcov, ep_len = 0, 0, 0
                 done = {}
                 obs = env.reset(init_pose_list=init_pose_list, **params)
 
                 s_time = time.time()
 
                 action_dict = {}
-                while type(done) is dict:
+                bigq0 = []
+                bigq1 = []
+                # while type(done) is dict:
+                while ep_len < 30:
                     if args.render:
                         env.render()
                     if args.ros_log:
@@ -75,6 +78,23 @@ class Test:
                     obs, rew, done, info = env.step(action_dict)
                     episode_rew += rew['__all__']
                     nlogdetcov += info['mean_nlogdetcov']
+
+                    rearrange = [0,3,6,9,1,4,7,10,2,5,8,11]
+                    qs0 = np.zeros((12))
+                    qs1 = np.zeros((12))
+                    q0 = np.zeros((12))
+                    q1 = np.zeros((12))
+                    qs0[action_dict['agent-0']] = 1
+                    qs1[action_dict['agent-1']] = 1
+                    for ii, val in enumerate(rearrange):
+                        q0[ii] = qs0[val]
+                        q1[ii] = qs1[val] 
+
+                    bigq0.append(q0)
+                    bigq1.append(q1)
+                    ep_len += 1
+                bigq0 = np.asarray(bigq0)
+                bigq1 = np.asarray(bigq1)
 
                 time_elapsed.append(time.time() - s_time)
                 ep_nlogdetcov.append(nlogdetcov)
@@ -101,7 +121,7 @@ class Test:
             # model_seed = os.path.split(args.log_fname)[0]
             if not os.path.exists(eval_dir):
                 os.makedirs(eval_dir)
-            matplotlib.use('Agg')
+            # matplotlib.use('Agg')
             f0, ax0 = plt.subplots()
             _ = ax0.plot(ep_nlogdetcov, '.')
             _ = ax0.set_title(args.env)
@@ -115,6 +135,34 @@ class Test:
             plt.close()
             pickle.dump(ep_nlogdetcov, open(os.path.join(eval_dir,"%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps))
                                                                     +model_seed+".pkl", 'wb'))
+
+            f2 = plt.figure()
+            ax2 = f2.add_subplot(121,projection='3d')
+            ax3 = f2.add_subplot(122,projection='3d')
+
+            lx = len(bigq0[0])
+            ly = len(bigq0[:,0])
+            xpos = np.arange(0,lx,1)
+            ypos = np.arange(0,ly,1)
+            xpos, ypos = np.meshgrid(xpos+0.25, ypos+0.25)
+
+            xpos = xpos.flatten()
+            ypos = ypos.flatten()
+            zpos = np.zeros(lx*ly)
+
+            dx = 0.5 *np.ones_like(zpos)
+            dy = dx.copy()
+            dz0 = bigq0.flatten()
+            dz1 = bigq1.flatten()
+            
+            cs = ['r', 'r', 'r', 'r', 'g', 'g', 'g', 'g','b','b','b','b'] * ly
+
+            ax2.bar3d(xpos,ypos,zpos, dx, dy, dz0, color=cs)
+            ax3.bar3d(xpos,ypos,zpos, dx, dy, dz1, color=cs)
+
+
+            plt.show()
+
         #Plot over all example episode sets
         f1, ax1 = plt.subplots()
         _ = ax1.plot(total_nlogdetcov, '.')
