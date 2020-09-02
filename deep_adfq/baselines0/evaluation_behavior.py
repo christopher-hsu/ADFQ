@@ -6,6 +6,19 @@ import numpy as np
 from baselines0.common import set_global_seeds
 import tensorflow as tf
 
+
+def get_init_pose_list(nb_test_steps):
+    init_pose_list = []
+    for ii in range(nb_test_steps):
+        left = np.random.uniform(20,25)
+        right = np.random.uniform(30,45)
+        yaxis = np.random.uniform(25,40)
+        init_pose_list.append({'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
+                        'targets':[[left, yaxis, 0, 0],[right, yaxis, 0, 0]],
+                        'belief_targets':[[left, yaxis, 0, 0], [right, yaxis, 0, 0]]})
+
+    return init_pose_list
+
 class Test:
     def __init__(self):
         pass
@@ -49,12 +62,13 @@ class Test:
             from envs.target_tracking.ros_wrapper import RosLog
             ros_log = RosLog(num_targets=args.nb_targets, wrapped_num=args.ros + args.render + args.record + 1)
 
-
+        init_pose_list = get_init_pose_list(args.nb_test_steps)
         total_nlogdetcov = []
         for params in params_set:
             ep = 0
             ep_nlogdetcov = [] #'Episode nLogDetCov'
             time_elapsed = ['Elapsed Time (sec)']
+            test_observations = np.zeros(args.nb_test_steps)
 
             while(ep < args.nb_test_steps): # test episode
                 ep += 1
@@ -64,17 +78,21 @@ class Test:
 
                 s_time = time.time()
 
+                all_observations = np.zeros(env.nb_targets, dtype=bool)
                 action_dict = {}
                 bigq0 = []
                 bigq1 = []
                 # while type(done) is dict:
-                while ep_len < 30:
+                while ep_len < 60:
                     if args.render:
                         env.render()
                     if args.ros_log:
                         ros_log.log(env)
                     for agent_id, a_obs in obs.items():
                         action_dict[agent_id] = act(np.array(a_obs)[None])[0]
+                        # record target observations
+                        observed = np.zeros(env.nb_targets, dtype=bool)
+                        all_observations = np.logical_or(all_observations, a_obs[:,5].astype(bool))  
                     obs, rew, done, info = env.step(action_dict)
                     episode_rew += rew['__all__']
                     nlogdetcov += info['mean_nlogdetcov']
@@ -109,32 +127,32 @@ class Test:
                 ros_log.save(args.log_dir)
 
             # Stats
-            meanofeps = np.mean(ep_nlogdetcov)
-            total_nlogdetcov.append(meanofeps)
-            # Eval plots and saves
-            if args.env == 'setTracking-v7':
-                eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'v7_eval_seed%d_'%(seed)+args.map)
-            else:
-                eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'eval_seed%d_'%(seed)+args.map)
-            model_seed = os.path.split(args.log_dir)[-1]           
-            # eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
-            # model_seed = os.path.split(args.log_fname)[0]
-            if not os.path.exists(eval_dir):
-                os.makedirs(eval_dir)
-            # matplotlib.use('Agg')
-            f0, ax0 = plt.subplots()
-            _ = ax0.plot(ep_nlogdetcov, '.')
-            _ = ax0.set_title(args.env)
-            _ = ax0.set_xlabel('episode number')
-            _ = ax0.set_ylabel('mean nlogdetcov')
-            _ = ax0.axhline(y=meanofeps, color='r', linestyle='-', label='mean over episodes: %.2f'%(meanofeps))
-            _ = ax0.legend()
-            _ = ax0.grid()
-            _ = f0.savefig(os.path.join(eval_dir, "%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps)
-                                                    +model_seed+".png"))
-            plt.close()
-            pickle.dump(ep_nlogdetcov, open(os.path.join(eval_dir,"%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps))
-                                                                    +model_seed+".pkl", 'wb'))
+            # meanofeps = np.mean(ep_nlogdetcov)
+            # total_nlogdetcov.append(meanofeps)
+            # # Eval plots and saves
+            # if args.env == 'setTracking-v7':
+            #     eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'v7_eval_seed%d_'%(seed)+args.map)
+            # else:
+            #     eval_dir = os.path.join(os.path.split(args.log_dir)[0], 'eval_seed%d_'%(seed)+args.map)
+            # model_seed = os.path.split(args.log_dir)[-1]           
+            # # eval_dir = os.path.join(args.log_dir, 'eval_seed%d_'%(seed)+args.map)
+            # # model_seed = os.path.split(args.log_fname)[0]
+            # if not os.path.exists(eval_dir):
+            #     os.makedirs(eval_dir)
+            # # matplotlib.use('Agg')
+            # f0, ax0 = plt.subplots()
+            # _ = ax0.plot(ep_nlogdetcov, '.')
+            # _ = ax0.set_title(args.env)
+            # _ = ax0.set_xlabel('episode number')
+            # _ = ax0.set_ylabel('mean nlogdetcov')
+            # _ = ax0.axhline(y=meanofeps, color='r', linestyle='-', label='mean over episodes: %.2f'%(meanofeps))
+            # _ = ax0.legend()
+            # _ = ax0.grid()
+            # _ = f0.savefig(os.path.join(eval_dir, "%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps)
+            #                                         +model_seed+".png"))
+            # plt.close()
+            # pickle.dump(ep_nlogdetcov, open(os.path.join(eval_dir,"%da%dt_%d_eval_"%(env.nb_agents, env.nb_targets, args.nb_test_steps))
+            #                                                         +model_seed+".pkl", 'wb'))
 
             f2 = plt.figure()
             ax2 = f2.add_subplot(121,projection='3d')
@@ -160,19 +178,20 @@ class Test:
             ax2.bar3d(xpos,ypos,zpos, dx, dy, dz0, color=cs)
             ax3.bar3d(xpos,ypos,zpos, dx, dy, dz1, color=cs)
 
-
+            print(test_observations)
+            print("Cooperation ratio over total evals: %.2f"%(np.sum(test_observations)/args.nb_test_steps))
             plt.show()
 
         #Plot over all example episode sets
-        f1, ax1 = plt.subplots()
-        _ = ax1.plot(total_nlogdetcov, '.')
-        _ = ax1.set_title(args.env)
-        _ = ax1.set_xlabel('example episode set number')
-        _ = ax1.set_ylabel('mean nlogdetcov over episodes')
-        _ = ax1.grid()
-        _ = f1.savefig(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps)+model_seed+'.png'))
-        plt.close()        
-        pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'%da%dt'%(args.nb_agents,args.nb_targets)+'.pkl', 'wb'))
+        # f1, ax1 = plt.subplots()
+        # _ = ax1.plot(total_nlogdetcov, '.')
+        # _ = ax1.set_title(args.env)
+        # _ = ax1.set_xlabel('example episode set number')
+        # _ = ax1.set_ylabel('mean nlogdetcov over episodes')
+        # _ = ax1.grid()
+        # _ = f1.savefig(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps)+model_seed+'.png'))
+        # plt.close()        
+        # pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'%da%dt'%(args.nb_agents,args.nb_targets)+'.pkl', 'wb'))
 
 
 init_pose_list = [{'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
