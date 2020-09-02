@@ -7,15 +7,16 @@ from baselines0.common import set_global_seeds
 import tensorflow as tf
 
 
-def get_init_pose_list(nb_test_steps):
+def get_init_pose_list(nb_test_eps):
     init_pose_list = []
-    for ii in range(nb_test_steps):
-        left = np.random.uniform(20,25)
-        right = np.random.uniform(30,45)
-        yaxis = np.random.uniform(25,40)
+    for ii in range(nb_test_eps):
+        left = np.random.uniform(20,30)
+        right = np.random.uniform(30,40)
+        Lyaxis = np.random.uniform(25,35)
+        Ryaxis = np.random.uniform(35,45)
         init_pose_list.append({'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
-                        'targets':[[left, yaxis, 0, 0],[right, yaxis, 0, 0]],
-                        'belief_targets':[[left, yaxis, 0, 0], [right, yaxis, 0, 0]]})
+                        'targets':[[left, Lyaxis, 0, 0],[right, Ryaxis, 0, 0]],
+                        'belief_targets':[[left, Lyaxis, 0, 0], [right, Ryaxis, 0, 0]]})
 
     return init_pose_list
 
