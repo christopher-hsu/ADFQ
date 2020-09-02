@@ -7,16 +7,33 @@ from baselines0.common import set_global_seeds
 import tensorflow as tf
 
 
-def get_init_pose_list(nb_test_eps):
+def get_init_pose_list(nb_test_steps, eval_type):
     init_pose_list = []
-    for ii in range(nb_test_eps):
-        left = np.random.uniform(20,30)
-        right = np.random.uniform(30,40)
-        Lyaxis = np.random.uniform(25,35)
-        Ryaxis = np.random.uniform(35,45)
-        init_pose_list.append({'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
-                        'targets':[[left, Lyaxis, 0, 0],[right, Ryaxis, 0, 0]],
-                        'belief_targets':[[left, Lyaxis, 0, 0], [right, Ryaxis, 0, 0]]})
+    if eval_type == 'fixed_2':
+        for ii in range(nb_test_steps):
+            left = np.random.uniform(20,30)
+            Lyaxis = np.random.uniform(25,35)
+            right = np.random.uniform(30,40)
+            Ryaxis = np.random.uniform(35,45)
+            init_pose_list.append({'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
+                            'targets':[[left, Lyaxis, 0, 0],[right, Ryaxis, 0, 0]],
+                            'belief_targets':[[left, Lyaxis, 0, 0], [right, Ryaxis, 0, 0]]})
+    else:
+        for ii in range(nb_test_steps):
+            xone = np.random.uniform(20,30)
+            yone = np.random.uniform(15,25)
+            xtwo = np.random.uniform(30,40)
+            ytwo = np.random.uniform(25,35)
+            xthree = np.random.uniform(20,30)
+            ythree = np.random.uniform(35,45)
+            xfour = np.random.uniform(10,20)
+            yfour = np.random.uniform(35,45)
+            init_pose_list.append({'agents':[[24.5, 10, 1.57], [26.5, 10, 1.57], 
+                                            [22.5, 10, 1.57], [28.5, 10, 1.57]],
+                            'targets':[[xone, yone, 0, 0],[xtwo, ytwo, 0, 0],
+                                        [xthree, ythree, 0, 0],[xfour, yfour, 0, 0]],
+                            'belief_targets':[[xone, yone, 0, 0], [xtwo, ytwo, 0, 0],
+                                            [xthree, ythree, 0, 0], [xfour, yfour, 0, 0]]}) 
 
     return init_pose_list
 
@@ -52,6 +69,13 @@ class Test:
                 # params_set = SET_EVAL_8a
             else:
                 raise ValueError("Eval set not created for this env.")
+        elif args.eval_type == 'fixed_2':
+            params_set = EVAL_BEHAVIOR_2
+            tot_eplen = 60
+        elif args.eval_type == 'fixed_4':
+            params_set = EVAL_BEHAVIOR_4
+            tot_eplen = 100
+
         else:
             raise ValueError("Wrong evaluation type for ttenv.")
 
@@ -63,7 +87,7 @@ class Test:
             from envs.target_tracking.ros_wrapper import RosLog
             ros_log = RosLog(num_targets=args.nb_targets, wrapped_num=args.ros + args.render + args.record + 1)
 
-        init_pose_list = get_init_pose_list(args.nb_test_steps)
+        init_pose_list = get_init_pose_list(args.nb_test_steps, args.eval_type)
         total_nlogdetcov = []
         for params in params_set:
             ep = 0
@@ -84,7 +108,7 @@ class Test:
                 bigq0 = []
                 bigq1 = []
                 # while type(done) is dict:
-                while ep_len < 60:
+                while ep_len < tot_eplen:
                     if args.render:
                         env.render()
                     if args.ros_log:
@@ -198,6 +222,14 @@ class Test:
 # init_pose_list = [{'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
 #                   'targets':[[20, 35, 0, 0],[40, 35, 0, 0]],
 #                   'belief_targets':[[20, 35, 0, 0], [40, 35, 0, 0]]}]
+
+EVAL_BEHAVIOR_2 = [
+        {'nb_agents': 2, 'nb_targets': 2},
+]
+EVAL_BEHAVIOR_4 = [
+        {'nb_agents': 4, 'nb_targets': 4},
+]
+
 
 SET_EVAL_8a = [
         {'nb_agents': 4, 'nb_targets': 4},

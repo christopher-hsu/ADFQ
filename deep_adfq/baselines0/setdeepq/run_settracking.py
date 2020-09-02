@@ -48,7 +48,7 @@ parser.add_argument('--map', type=str, default="emptyMed")
 parser.add_argument('--nb_agents', type=int, default=4)
 parser.add_argument('--nb_targets', type=int, default=4)
 parser.add_argument('--eval_type', choices=['random', 'random_zone', 
-                                            'fixed_nb', 'fixed'], default='fixed_nb')
+                                            'fixed_nb', 'fixed_2', 'fixed_4'], default='fixed_nb')
 parser.add_argument('--init_file_path', type=str, default=".", help="use eval_type: fixed_pose")
 
 args = parser.parse_args()
