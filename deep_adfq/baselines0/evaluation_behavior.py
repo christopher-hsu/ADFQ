@@ -194,9 +194,9 @@ class Test:
         # pickle.dump(total_nlogdetcov, open(os.path.join(eval_dir,'all_%d_eval'%(args.nb_test_steps))+model_seed+'%da%dt'%(args.nb_agents,args.nb_targets)+'.pkl', 'wb'))
 
 
-init_pose_list = [{'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
-                  'targets':[[20, 35, 0, 0],[40, 35, 0, 0]],
-                  'belief_targets':[[20, 35, 0, 0], [40, 35, 0, 0]]}]
+# init_pose_list = [{'agents':[[24.5, 15.5, 1.57], [26.5, 15.5, 1.57]],
+#                   'targets':[[20, 35, 0, 0],[40, 35, 0, 0]],
+#                   'belief_targets':[[20, 35, 0, 0], [40, 35, 0, 0]]}]
 
 SET_EVAL_8a = [
         {'nb_agents': 4, 'nb_targets': 4},
