@@ -116,8 +116,9 @@ class Test:
                     for agent_id, a_obs in obs.items():
                         action_dict[agent_id] = act(np.array(a_obs)[None])[0]
                         # record target observations
-                        observed = np.zeros(env.nb_targets, dtype=bool)
                         all_observations = np.logical_or(all_observations, a_obs[:,5].astype(bool))  
+                    if all(all_observations) == True:
+                        test_observations[ep-1] = 1
                     obs, rew, done, info = env.step(action_dict)
                     episode_rew += rew['__all__']
                     nlogdetcov += info['mean_nlogdetcov']
